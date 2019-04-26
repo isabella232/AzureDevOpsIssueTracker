@@ -26,6 +26,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsBaseUrl", ConfigurationDocumentStore.GetBaseUrl(),
                 isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetBaseUrl()),
                 AzureDevOpsConfigurationResource.BaseUrlDisplayName);
+            yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
+                ConfigurationDocumentStore.GetPersonalAccessToken(),
+                false, AzureDevOpsConfigurationResource.PersonalAccessTokenDisplayName);
         }
 
         public override void BuildMappings(IResourceMappingsBuilder builder)

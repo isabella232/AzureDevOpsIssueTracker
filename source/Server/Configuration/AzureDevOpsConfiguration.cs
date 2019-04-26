@@ -1,4 +1,5 @@
 ﻿using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
+using Octopus.Shared.Model;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
@@ -10,5 +11,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         }
 
         public string BaseUrl { get; set; }
+        [Encrypted]
+        public string PersonalAccessToken { get; set; }
     }
 }

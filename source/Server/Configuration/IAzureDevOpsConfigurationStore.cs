@@ -6,5 +6,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     {
         string GetBaseUrl();
         void SetBaseUrl(string baseUrl);
+
+        string GetPersonalAccessToken();
+        void SetPersonalAccessToken(string value);
     }
 }

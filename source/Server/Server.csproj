@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Octopus.Diagnostics" Version="1.3.0" />
     <PackageReference Include="Octopus.Server.Extensibility" Version="6.2.0" />
+    <PackageReference Include="Octopus.Shared" Version="4.9.9" />
   </ItemGroup>
 
 </Project>

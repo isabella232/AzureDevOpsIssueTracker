@@ -24,5 +24,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         {
             SetProperty(doc => doc.BaseUrl = baseUrl?.Trim('/'));
         }
+
+        public string GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
+        public void SetPersonalAccessToken(string value) => SetProperty(doc => doc.PersonalAccessToken = value);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Octopus.Data.Resources;
 using Octopus.Data.Resources.Attributes;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
@@ -16,5 +17,16 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Required]
         [Writeable]
         public string BaseUrl { get; set; }
+
+        public const string PersonalAccessTokenDisplayName = "Personal Access Token";
+
+        public const string PersonalAccessTokenDescription =
+            "A Personal Access Token authorized to read scopes 'Build' and 'Work items', added under User Settings.";
+
+        [DisplayName(PersonalAccessTokenDisplayName)]
+        [Description(PersonalAccessTokenDescription)]
+        [Required]
+        [Writeable]
+        public SensitiveValue PersonalAccessToken { get; set; }
     }
 }

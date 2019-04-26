@@ -33,6 +33,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                     azureDevOpsConfiguration.Value.SetBaseUrl(v);
                     log.Info($"Azure DevOps Issue Tracker integration base Url set to: {v}");
                 });
+            yield return new ConfigureCommandOption("AzureDevOpsPersonalAccessToken=", AzureDevOpsConfigurationResource.PersonalAccessTokenDescription,
+                v =>
+                {
+                    azureDevOpsConfiguration.Value.SetPersonalAccessToken(v);
+                    log.Info($"Azure DevOps Issue Tracker integration personal access token set to: {v}");
+                });
         }
     }
 }
