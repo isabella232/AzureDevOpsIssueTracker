@@ -27,7 +27,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                     azureDevOpsConfiguration.Value.SetIsEnabled(isEnabled);
                     log.Info($"Azure DevOps Issue Tracker integration IsEnabled set to: {isEnabled}");
                 });
-            yield return new ConfigureCommandOption("AzureDevOpsBaseUrl=", AzureDevOpsConfigurationResource.AzureDevOpsBaseUrlDescription,
+            yield return new ConfigureCommandOption("AzureDevOpsBaseUrl=", AzureDevOpsConfigurationResource.BaseUrlDescription,
                 v =>
                 {
                     azureDevOpsConfiguration.Value.SetBaseUrl(v);
