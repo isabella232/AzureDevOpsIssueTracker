@@ -8,9 +8,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     [Description("Configure the Azure DevOps Issue Tracker. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
     public class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
+        public const string BaseUrlDisplayName = "Azure DevOps Base Url";
         public const string BaseUrlDescription = "Enter the base url of your Azure DevOps organization or collection.";
 
-        [DisplayName("Azure DevOps Base Url")]
+        [DisplayName(BaseUrlDisplayName)]
         [Description(BaseUrlDescription)]
         [Required]
         [Writeable]
