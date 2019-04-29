@@ -4,7 +4,9 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.Extensions.Mappings;
 using Octopus.Server.Extensibility.Extensions.WorkItems;
+using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
+using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 {
@@ -38,6 +40,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 
             builder.RegisterType<AzureDevOpsConfigureCommands>()
                 .As<IContributeToConfigureCommand>()
+                .InstancePerDependency();
+
+            builder.RegisterType<AdoApiClient>()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder.RegisterType<WorkItemLinkMapper>()
+                .As<IWorkItemLinkMapper>()
                 .InstancePerDependency();
         }
     }
