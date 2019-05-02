@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json.Linq;
@@ -14,29 +13,16 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         private const string ApiVersionQuery = @"?api-version=5.0";
 
         private readonly IAzureDevOpsConfigurationStore store;
+        private readonly IHttpJsonClient client;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store)
+        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client)
         {
             this.store = store;
-        }
 
-        private HttpClient CreateAuthenticatedClient()
-        {
-            var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var basicAuthCred = Convert.ToBase64String(Encoding.ASCII.GetBytes(":" + store.GetPersonalAccessToken()));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuthCred);
-            return client;
-        }
-
-        internal JObject RequestJObject(string url)
-        {
-            using (var client = CreateAuthenticatedClient())
-            using (var response = client.GetAsync(url).GetAwaiter().GetResult())
-            {
-                response.EnsureSuccessStatusCode();
-                return JObject.Parse(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
-            }
+            this.client = client;
         }
 
         public (int id, string url)[] GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
@@ -44,7 +30,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
 
-            return RequestJObject(workItemsUrl)["value"]
+            return client.Get(workItemsUrl)["value"]
                 .Select(el => (el["id"].Value<int>(), el["url"].ToString()))
                 .ToArray();
         }
@@ -52,7 +38,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         internal JObject GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
-            return RequestJObject($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}");
+            return client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}");
         }
 
         public string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)

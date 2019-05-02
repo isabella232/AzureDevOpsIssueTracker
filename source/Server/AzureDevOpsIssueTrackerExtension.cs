@@ -42,6 +42,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
                 .As<IContributeToConfigureCommand>()
                 .InstancePerDependency();
 
+            builder.RegisterType<HttpJsonClient>()
+                .As<IHttpJsonClient>()
+                .InstancePerDependency();
+
             builder.RegisterType<AdoApiClient>()
                 .AsSelf()
                 .InstancePerLifetimeScope();
