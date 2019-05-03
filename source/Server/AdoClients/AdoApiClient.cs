@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Linq;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -26,10 +23,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client)
         {
             this.store = store;
-
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var basicAuthCred = Convert.ToBase64String(Encoding.ASCII.GetBytes(":" + store.GetPersonalAccessToken()));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", basicAuthCred);
             this.client = client;
         }
 
@@ -38,7 +31,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
 
-            return client.Get(workItemsUrl)["value"]
+            return client.Get(workItemsUrl, store.GetPersonalAccessToken())
+                ["value"]
                 .Select(el => (el["id"].Value<int>(), el["url"].ToString()))
                 .ToArray();
         }
@@ -46,7 +40,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         internal JObject GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
-            return client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}");
+            return client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
+                store.GetPersonalAccessToken());
         }
 
         public string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)
