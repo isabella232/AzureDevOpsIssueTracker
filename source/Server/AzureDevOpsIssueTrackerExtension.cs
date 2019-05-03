@@ -47,7 +47,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
                 .InstancePerDependency();
 
             builder.RegisterType<AdoApiClient>()
-                .AsSelf()
+                .As<IAdoApiClient>()
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<WorkItemLinkMapper>()

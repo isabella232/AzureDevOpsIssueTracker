@@ -9,9 +9,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
     public class WorkItemLinkMapper : IWorkItemLinkMapper
     {
         private readonly IAzureDevOpsConfigurationStore store;
-        private readonly AdoApiClient client;
+        private readonly IAdoApiClient client;
 
-        public WorkItemLinkMapper(IAzureDevOpsConfigurationStore store, AdoApiClient client)
+        public WorkItemLinkMapper(IAzureDevOpsConfigurationStore store, IAdoApiClient client)
         {
             this.store = store;
             this.client = client;
@@ -22,6 +22,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
         public WorkItemLink[] Map(OctopusPackageMetadata packageMetadata)
         {
+            if (!IsEnabled || string.IsNullOrWhiteSpace(packageMetadata.BuildUrl))
+                return null;
+
             return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(packageMetadata.BuildUrl));
         }
     }

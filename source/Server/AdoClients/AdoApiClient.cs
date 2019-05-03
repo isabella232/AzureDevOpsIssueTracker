@@ -8,7 +8,15 @@ using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    public class AdoApiClient
+    public interface IAdoApiClient
+    {
+        (int id, string url)[] GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls);
+        string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId);
+        WorkItemLink GetWorkItemLink(AdoProjectUrls adoProjectUrls, int workItemId);
+        WorkItemLink[] GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
+    }
+
+    public class AdoApiClient : IAdoApiClient
     {
         private const string ApiVersionQuery = @"?api-version=5.0";
 
