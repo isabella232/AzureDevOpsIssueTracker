@@ -25,7 +25,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         [DisplayName(PersonalAccessTokenDisplayName)]
         [Description(PersonalAccessTokenDescription)]
-        [Required]
         [Writeable]
         public SensitiveValue PersonalAccessToken { get; set; }
     }
