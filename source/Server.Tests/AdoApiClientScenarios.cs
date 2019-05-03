@@ -24,6 +24,7 @@ namespace Server.Tests
         public void ClientCanRequestAndParseWorkItemsRefsAndLinks()
         {
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
+            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
             store.GetPersonalAccessToken().Returns("rumor");
             var httpJsonClient = CreateCannedResponseHttpJsonClient();
 
@@ -34,6 +35,32 @@ namespace Server.Tests
             Assert.AreEqual("2", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=2", workItemLink.LinkUrl);
             Assert.AreEqual("README has no useful content", workItemLink.Description);
+        }
+
+        [Test]
+        public void PersonalAccessTokenIsOnlySentToItsOrigin()
+        {
+            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
+            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
+            store.GetPersonalAccessToken().Returns("rumor");
+            var httpJsonClient = Substitute.For<IHttpJsonClient>();
+            string passwordSent = ".";
+            httpJsonClient.Get(null)
+                .ReturnsForAnyArgs(ci =>
+                {
+                    passwordSent = ci.ArgAt<string>(1);
+                    return JObject.Parse(@"{""count"":0,""value"":[]}");
+                });
+
+            // Request to other host should not include password
+            new AdoApiClient(store, httpJsonClient)
+                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
+            Assert.IsNull(passwordSent);
+
+            // Request to origin should include password
+            new AdoApiClient(store, httpJsonClient)
+                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
+            Assert.AreEqual("rumor", passwordSent);
         }
     }
 }

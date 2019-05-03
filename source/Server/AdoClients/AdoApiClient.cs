@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -26,12 +27,26 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             this.client = client;
         }
 
+        internal string GetPersonalAccessToken(AdoUrl adoUrl)
+        {
+            try
+            {
+                return new Uri(store.GetBaseUrl().TrimEnd('/'), UriKind.Absolute).IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute))
+                    ? store.GetPersonalAccessToken()
+                    : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public (int id, string url)[] GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
         {
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
 
-            return client.Get(workItemsUrl, store.GetPersonalAccessToken())
+            return client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls))
                 ["value"]
                 .Select(el => (el["id"].Value<int>(), el["url"].ToString()))
                 .ToArray();
@@ -41,7 +56,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             // ReSharper disable once StringLiteralTypo
             return client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
-                store.GetPersonalAccessToken());
+                GetPersonalAccessToken(adoProjectUrls));
         }
 
         public string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)
