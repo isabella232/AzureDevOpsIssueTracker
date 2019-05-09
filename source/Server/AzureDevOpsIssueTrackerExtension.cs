@@ -53,10 +53,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
             builder.RegisterType<WorkItemLinkMapper>()
                 .As<IWorkItemLinkMapper>()
                 .InstancePerDependency();
-
-            builder.RegisterType<CommitLinkMapper>()
-                .As<ICommitLinkMapper>()
-                .InstancePerDependency();
         }
     }
 }
