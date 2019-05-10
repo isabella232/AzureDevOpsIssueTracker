@@ -22,7 +22,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
         public WorkItemLink[] Map(OctopusPackageMetadata packageMetadata)
         {
-            if (!IsEnabled || string.IsNullOrWhiteSpace(packageMetadata.BuildUrl))
+            if (!IsEnabled
+                || string.IsNullOrWhiteSpace(packageMetadata.BuildUrl)
+                || packageMetadata.CommentParser != CommentParser)
                 return null;
 
             return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(packageMetadata.BuildUrl));
