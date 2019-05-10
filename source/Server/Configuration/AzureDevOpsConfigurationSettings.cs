@@ -28,7 +28,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                 AzureDevOpsConfigurationResource.BaseUrlDisplayName);
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
                 ConfigurationDocumentStore.GetPersonalAccessToken(),
-                false, AzureDevOpsConfigurationResource.PersonalAccessTokenDisplayName);
+                false, "Azure DevOps Personal Access Token");
         }
 
         public override void BuildMappings(IResourceMappingsBuilder builder)

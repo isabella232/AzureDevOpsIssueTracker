@@ -18,12 +18,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Writeable]
         public string BaseUrl { get; set; }
 
-        public const string PersonalAccessTokenDisplayName = "Personal Access Token";
-
         public const string PersonalAccessTokenDescription =
             "A Personal Access Token authorized to read scopes 'Build' and 'Work items', added under User Settings.";
 
-        [DisplayName(PersonalAccessTokenDisplayName)]
+        [DisplayName("Personal Access Token")]
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
         public SensitiveValue PersonalAccessToken { get; set; }
