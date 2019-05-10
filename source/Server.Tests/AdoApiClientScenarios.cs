@@ -10,6 +10,14 @@ namespace Server.Tests
     [TestFixture]
     public class AdoApiClientScenarios
     {
+        private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
+        {
+            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
+            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
+            store.GetPersonalAccessToken().Returns("rumor");
+            return store;
+        }
+
         private static IHttpJsonClient CreateCannedResponseHttpJsonClient()
         {
             var httpJsonClient = Substitute.For<IHttpJsonClient>();
@@ -23,9 +31,7 @@ namespace Server.Tests
         [Test]
         public void ClientCanRequestAndParseWorkItemsRefsAndLinks()
         {
-            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
-            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
-            store.GetPersonalAccessToken().Returns("rumor");
+            var store = CreateSubstituteStore();
             var httpJsonClient = CreateCannedResponseHttpJsonClient();
 
             var workItemLink = new AdoApiClient(store, httpJsonClient).GetBuildWorkItemLinks(
@@ -40,9 +46,7 @@ namespace Server.Tests
         [Test]
         public void PersonalAccessTokenIsOnlySentToItsOrigin()
         {
-            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
-            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
-            store.GetPersonalAccessToken().Returns("rumor");
+            var store = CreateSubstituteStore();
             var httpJsonClient = Substitute.For<IHttpJsonClient>();
             string passwordSent = ".";
             httpJsonClient.Get(null)
