@@ -18,21 +18,16 @@ namespace Server.Tests
             return store;
         }
 
-        private static IHttpJsonClient CreateCannedResponseHttpJsonClient()
-        {
-            var httpJsonClient = Substitute.For<IHttpJsonClient>();
-            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/build/builds/24/workitems?api-version=5.0", "rumor")
-                .Returns(JObject.Parse(@"{""count"":1,""value"":[{""id"":""2"",""url"":""http://redstoneblock/DefaultCollection/_apis/wit/workItems/2""}]}"));
-            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/2?api-version=5.0", "rumor")
-                .Returns(JObject.Parse(@"{""id"":2,""fields"":{""System.Title"": ""README has no useful content""}}"));
-            return httpJsonClient;
-        }
-
         [Test]
         public void ClientCanRequestAndParseWorkItemsRefsAndLinks()
         {
             var store = CreateSubstituteStore();
-            var httpJsonClient = CreateCannedResponseHttpJsonClient();
+            var httpJsonClient1 = Substitute.For<IHttpJsonClient>();
+            httpJsonClient1.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/build/builds/24/workitems?api-version=5.0", "rumor")
+                .Returns(JObject.Parse(@"{""count"":1,""value"":[{""id"":""2"",""url"":""http://redstoneblock/DefaultCollection/_apis/wit/workItems/2""}]}"));
+            httpJsonClient1.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/2?api-version=5.0", "rumor")
+                .Returns(JObject.Parse(@"{""id"":2,""fields"":{""System.Title"": ""README has no useful content""}}"));
+            var httpJsonClient = httpJsonClient1;
 
             var workItemLink = new AdoApiClient(store, httpJsonClient).GetBuildWorkItemLinks(
                     AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"))
