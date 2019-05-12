@@ -4,6 +4,12 @@
     <TargetFramework>net452</TargetFramework>
     <AssemblyName>Octopus.Server.Extensibility.IssueTracker.AzureDevOps</AssemblyName>
     <RootNamespace>Octopus.Server.Extensibility.IssueTracker.AzureDevOps</RootNamespace>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Description>Implements the Azure DevOps issue tracker.</Description>
+    <Authors>Octopus Deploy</Authors>
+    <PackageIconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests</AssemblyName>
+    <RootNamespace>Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

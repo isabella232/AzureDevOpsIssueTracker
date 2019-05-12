@@ -1,16 +1,20 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Octopus.Data.Resources;
-using Octopus.Data.Resources.Attributes;
-using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
+using Octopus.Client.Extensibility.Attributes;
+using Octopus.Client.Extensibility.Extensions.Infrastructure.Configuration;
+using Octopus.Client.Model;
 
-namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
+namespace Octopus.Client.Extensibility.IssueTracker.AzureDevOps
 {
-    [Description("Configure the Azure DevOps Issue Tracker. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
     public class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
         public const string BaseUrlDisplayName = "Azure DevOps Base Url";
         public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection.";
+
+        public AzureDevOpsConfigurationResource()
+        {
+            Id = "issuetracker-azuredevops";
+        }
 
         [DisplayName(BaseUrlDisplayName)]
         [Description(BaseUrlDescription)]

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <AssemblyName>Octopus.Client.Extensibility.IssueTracker.AzureDevOps</AssemblyName>
+    <RootNamespace>Octopus.Client.Extensibility.IssueTracker.AzureDevOps</RootNamespace>
+    <Authors>Octopus Deploy</Authors>
+    <Company>Octopus Deploy Pty. Ltd.</Company>
+    <Product>Octopus Deploy Client Extensibility - AzureDevOps</Product>
+    <Description>Octopus Deploy Client Extensibility for the Azure DevOps issue tracker</Description>
+    <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
+    <PackageIconUrl>http://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Octopus.Client" Version="6.3.2" />
+  </ItemGroup>
+
+</Project>
