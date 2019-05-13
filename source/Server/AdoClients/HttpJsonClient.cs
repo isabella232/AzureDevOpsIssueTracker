@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,14 +9,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     public interface IHttpJsonClient : IDisposable
     {
-        JObject Get(string url, string basicPassword = null);
+        (HttpStatusCode status, JObject jObject) Get(string url, string basicPassword = null);
     }
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
         private readonly HttpClient httpClient = new HttpClient();
 
-        public JObject Get(string url, string basicPassword = null)
+        public (HttpStatusCode status, JObject jObject) Get(string url, string basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -27,8 +28,22 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             using (var response = httpClient.SendAsync(request).GetAwaiter().GetResult())
             {
-                response.EnsureSuccessStatusCode();
-                return JObject.Parse(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                return (
+                    response.StatusCode,
+                    ParseJsonOrDefault(response.Content)
+                );
+            }
+        }
+
+        private JObject ParseJsonOrDefault(HttpContent httpContent)
+        {
+            try
+            {
+                return JObject.Parse(httpContent.ReadAsStringAsync().GetAwaiter().GetResult());
+            }
+            catch
+            {
+                return null;
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -46,17 +48,38 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
 
-            return client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls))
-                ["value"]
+            var (status, jObject) = client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls));
+            if (status == HttpStatusCode.NotFound)
+            {
+                return new (int id, string url)[0];
+            }
+
+            if (!status.IsSuccessStatusCode())
+            {
+                throw new HttpRequestException($"Error while fetching work items from Azure DevOps: {status.ToDescription()}");
+            }
+
+            return jObject["value"]
                 .Select(el => (el["id"].Value<int>(), el["url"].ToString()))
                 .ToArray();
         }
 
-        internal JObject GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
+        internal string GetWorkItemTitle(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
-            return client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
+            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
                 GetPersonalAccessToken(adoProjectUrls));
+            if (status == HttpStatusCode.NotFound)
+            {
+                return workItemId.ToString();
+            }
+
+            if (!status.IsSuccessStatusCode())
+            {
+                throw new HttpRequestException($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
+            }
+
+            return jObject["fields"]["System.Title"].ToString();
         }
 
         public string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)
@@ -71,7 +94,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             {
                 Id = workItemId.ToString(),
                 LinkUrl = BuildWorkItemBrowserUrl(adoProjectUrls, workItemId),
-                Description = GetWorkItem(adoProjectUrls, workItemId)["fields"]["System.Title"].ToString()
+                Description = GetWorkItemTitle(adoProjectUrls, workItemId)
             };
         }
 
