@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 
-namespace Server.Tests
+namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
     [TestFixture]
     public class AdoUrlScenarios

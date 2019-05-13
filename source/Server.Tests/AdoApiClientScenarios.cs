@@ -1,15 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
-using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
-using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
-namespace Server.Tests
+namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
     [TestFixture]
     public class AdoApiClientScenarios

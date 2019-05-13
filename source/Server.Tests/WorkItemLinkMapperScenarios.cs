@@ -5,7 +5,7 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 
-namespace Server.Tests
+namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
     [TestFixture]
     public class WorkItemLinkMapperScenarios
