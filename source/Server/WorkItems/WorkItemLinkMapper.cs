@@ -23,11 +23,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public WorkItemLink[] Map(OctopusPackageMetadata packageMetadata)
         {
             if (!IsEnabled
-                || string.IsNullOrWhiteSpace(packageMetadata.BuildUrl)
+                || string.IsNullOrWhiteSpace(packageMetadata?.BuildUrl)
                 || packageMetadata.CommentParser != CommentParser)
                 return null;
 
-            return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(packageMetadata.BuildUrl));
+            var workItemLinks = client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(packageMetadata.BuildUrl));
+            // TODO Signal any failures
+            return workItemLinks.Value ?? new WorkItemLink[0];
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             }
             catch (Exception ex)
             {
-                log.Error(ex, "Error while converting Azure DevOps work item comment HTML to plain text.");
+                log.Info(ex, "Unable to convert Azure DevOps work item comment HTML to plain text.");
                 return html;
             }
         }
