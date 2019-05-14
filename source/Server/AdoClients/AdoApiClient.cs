@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
+using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
@@ -20,11 +21,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
+        private readonly HtmlConvert htmlConvert;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client)
+        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert)
         {
             this.store = store;
             this.client = client;
+            this.htmlConvert = htmlConvert;
         }
 
         internal string GetPersonalAccessToken(AdoUrl adoUrl)
@@ -98,8 +101,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 throw new HttpRequestException($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
             }
 
-            return jObject["comments"]
+            var commentsHtml = jObject["comments"]
                 .Select(c => c["text"].ToString())
+                .ToArray();
+
+            return commentsHtml
+                .Select(h => htmlConvert.ToPlainText(h))
+                .Select(t => t.Trim())
                 .ToArray();
         }
 
