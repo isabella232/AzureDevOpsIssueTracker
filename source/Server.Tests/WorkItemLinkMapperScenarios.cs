@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System;
+using NSubstitute;
 using NUnit.Framework;
 using Octopus.Server.Extensibility.HostServices.Model.PackageMetadata;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -14,14 +15,31 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         {
             var config = Substitute.For<IAzureDevOpsConfigurationStore>();
             config.GetIsEnabled().Returns(enabled);
-            return new WorkItemLinkMapper(config, Substitute.For<IAdoApiClient>());
+            var adoApiClient = Substitute.For<IAdoApiClient>();
+            adoApiClient.GetBuildWorkItemLinks(null).ReturnsForAnyArgs(ci => throw new InvalidOperationException());
+            return new WorkItemLinkMapper(config, adoApiClient);
         }
 
         [Test]
         public void WhenDisabledReturnsNull()
         {
-            var link = CreateWorkItemLinkMapper(false)
-                .Map(new OctopusPackageMetadata {BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"});
+            var link = CreateWorkItemLinkMapper(false).Map(new OctopusPackageMetadata
+            {
+                BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
+                CommentParser = AzureDevOpsConfigurationStore.CommentParser
+            });
+            Assert.IsNull(link);
+        }
+
+        [Test]
+        public void DoesNotAttemptToMapOtherCommentParsers()
+        {
+            // ReSharper disable once StringLiteralTypo
+            var link = CreateWorkItemLinkMapper(true).Map(new OctopusPackageMetadata
+            {
+                BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
+                CommentParser = "Jira"
+            });
             Assert.IsNull(link);
         }
     }
