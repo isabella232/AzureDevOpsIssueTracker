@@ -16,6 +16,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
             store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
             store.GetPersonalAccessToken().Returns("rumor");
+            store.GetReleaseNotePrefix().Returns("= Changelog =");
             return store;
         }
 
@@ -29,7 +30,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                     JObject.Parse(@"{""count"":1,""value"":[{""id"":""2"",""url"":""http://redstoneblock/DefaultCollection/_apis/wit/workItems/2""}]}")));
             httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/2?api-version=5.0", "rumor")
                 .Returns((HttpStatusCode.OK,
-                    JObject.Parse(@"{""id"":2,""fields"":{""System.Title"": ""README has no useful content""}}")));
+                    JObject.Parse(@"{""id"":2,""fields"":{""System.CommentCount"":0,""System.Title"": ""README has no useful content""}}")));
 
             var workItemLink = new AdoApiClient(store, httpJsonClient).GetBuildWorkItemLinks(
                     AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"))
@@ -38,6 +39,30 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             Assert.AreEqual("2", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=2", workItemLink.LinkUrl);
             Assert.AreEqual("README has no useful content", workItemLink.Description);
+        }
+
+        [Test]
+        public void ClientCanRequestAndParseWorkItemsWithReleaseNotes()
+        {
+            var store = CreateSubstituteStore();
+            var httpJsonClient = Substitute.For<IHttpJsonClient>();
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/build/builds/28/workitems?api-version=5.0", "rumor")
+                .Returns((HttpStatusCode.OK,
+                    JObject.Parse(@"{""count"":1,""value"":[{""id"":""4"",""url"":""http://redstoneblock/DefaultCollection/_apis/wit/workItems/4""}]}")));
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/4?api-version=5.0", "rumor")
+                .Returns((HttpStatusCode.OK,
+                    JObject.Parse(@"{""id"":4,""fields"":{""System.CommentCount"":3,""System.Title"":""The README riddle has no answer""}}")));
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/4/comments?api-version=5.0-preview.2", "rumor")
+                .Returns((HttpStatusCode.OK, JObject.Parse(@"{""totalCount"":3,""count"":3,""comments"":[{""text"":""= Changelog = N/A""}," +
+                                                           @"{""text"":""= Changelog = README riddle now has an answer!""},{""text"":""See also related issue.""}]}")));
+
+            var workItemLink = new AdoApiClient(store, httpJsonClient).GetBuildWorkItemLinks(
+                    AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=28"))
+                .Single();
+
+            Assert.AreEqual("4", workItemLink.Id);
+            Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=4", workItemLink.LinkUrl);
+            Assert.AreEqual("README riddle now has an answer!", workItemLink.Description);
         }
 
         [Test]

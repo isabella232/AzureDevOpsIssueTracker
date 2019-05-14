@@ -9,5 +9,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         string GetPersonalAccessToken();
         void SetPersonalAccessToken(string value);
+        string GetReleaseNotePrefix();
+        void SetReleaseNotePrefix(string releaseNotePrefix);
     }
 }

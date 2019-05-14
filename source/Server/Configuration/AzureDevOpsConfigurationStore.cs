@@ -27,5 +27,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public string GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
         public void SetPersonalAccessToken(string value) => SetProperty(doc => doc.PersonalAccessToken = value);
+        public string GetReleaseNotePrefix() => GetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix);
+        public void SetReleaseNotePrefix(string releaseNotePrefix) => SetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix = releaseNotePrefix);
     }
 }

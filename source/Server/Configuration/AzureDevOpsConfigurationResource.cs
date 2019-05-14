@@ -25,5 +25,19 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
         public SensitiveValue PersonalAccessToken { get; set; }
+
+        [DisplayName("Release Note Options")]
+        public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();
+    }
+
+    public class ReleaseNoteOptionsResource
+    {
+        public const string ReleaseNotePrefixDescription =
+            "Set the prefix to look for when finding release notes for Azure DevOps issues. For example `Release note:`.";
+
+        [DisplayName("Release Note Prefix")]
+        [Description(ReleaseNotePrefixDescription)]
+        [Writeable]
+        public string ReleaseNotePrefix { get; set; }
     }
 }

@@ -29,11 +29,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
                 ConfigurationDocumentStore.GetPersonalAccessToken(),
                 false, "Azure DevOps Personal Access Token");
+            yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsReleaseNotePrefix",
+                ConfigurationDocumentStore.GetReleaseNotePrefix(),
+                isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetReleaseNotePrefix()), "AzureDevOps Release Note Prefix");
         }
 
         public override void BuildMappings(IResourceMappingsBuilder builder)
         {
             builder.Map<AzureDevOpsConfigurationResource, AzureDevOpsConfiguration>();
+            builder.Map<ReleaseNoteOptionsResource, ReleaseNoteOptions>();
         }
     }
 }
