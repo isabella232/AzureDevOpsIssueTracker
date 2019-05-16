@@ -23,24 +23,26 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         [Test]
         public void WhenDisabledReturnsNull()
         {
-            var link = CreateWorkItemLinkMapper(false).Map(new OctopusPackageMetadata
+            var links = CreateWorkItemLinkMapper(false).Map(new OctopusPackageMetadata
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
                 CommentParser = AzureDevOpsConfigurationStore.CommentParser
             });
-            Assert.IsNull(link);
+            Assert.IsTrue(links.Succeeded);
+            Assert.IsNull(links.Value);
         }
 
         [Test]
         public void DoesNotAttemptToMapOtherCommentParsers()
         {
             // ReSharper disable once StringLiteralTypo
-            var link = CreateWorkItemLinkMapper(true).Map(new OctopusPackageMetadata
+            var links = CreateWorkItemLinkMapper(true).Map(new OctopusPackageMetadata
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
                 CommentParser = "Jira"
             });
-            Assert.IsNull(link);
+            Assert.IsTrue(links.Succeeded);
+            Assert.IsNull(links.Value);
         }
     }
 }
