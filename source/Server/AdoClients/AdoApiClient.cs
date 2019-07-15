@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -11,7 +12,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     public interface IAdoApiClient
     {
-        ExtResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
+        SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
     }
 
     public class AdoApiClient : IAdoApiClient
@@ -43,7 +44,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public ExtResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
+        public SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
         {
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
@@ -56,7 +57,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription()}");
             }
 
             try
@@ -67,11 +68,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item references from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item references from Azure DevOps.");
             }
         }
 
-        public ExtResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
+        public SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
@@ -83,7 +84,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
             }
 
             try
@@ -93,12 +94,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item details from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item details from Azure DevOps.");
             }
         }
 
         /// <returns>Up to 200 comments on the specified work item.</returns>
-        public ExtResult<string[]> GetWorkItemComments(AdoProjectUrls adoProjectUrls, int workItemId)
+        public SuccessOrErrorResult<string[]> GetWorkItemComments(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=5.0-preview.2",
@@ -111,7 +112,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
             }
 
             string[] commentsHtml;
@@ -123,7 +124,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item comments from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item comments from Azure DevOps.");
             }
 
             return commentsHtml
@@ -139,7 +140,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return $"{adoProjectUrls.ProjectUrl}/_workitems?_a=edit&id={workItemId}";
         }
 
-        public ExtResult<string> GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
+        public SuccessOrErrorResult<string> GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
         {
             var releaseNotePrefix = store.GetReleaseNotePrefix();
             if (string.IsNullOrWhiteSpace(releaseNotePrefix) || commentCount == 0)
@@ -150,7 +151,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var comments = GetWorkItemComments(adoProjectUrls, workItemId);
             if (!comments.Succeeded)
             {
-                return ExtResult.Failure(comments);
+                return SuccessOrErrorResult.Failure(comments);
             }
 
             var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -163,7 +164,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return releaseNote;
         }
 
-        public ExtResult<WorkItemLink> GetWorkItemLink(AdoProjectUrls adoProjectUrls, int workItemId)
+        public SuccessOrErrorResult<WorkItemLink> GetWorkItemLink(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             var workItem = GetWorkItem(adoProjectUrls, workItemId);
             var releaseNote = GetReleaseNote(adoProjectUrls, workItemId, workItem.Value.commentCount);
@@ -179,15 +180,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                         : workItemId.ToString()
             };
 
-            return ExtResult.Conditional(workItemLink, workItem, releaseNote);
+            return SuccessOrErrorResult.Conditional(workItemLink, workItem, releaseNote);
         }
 
-        public ExtResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls)
+        public SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls)
         {
             var workItemsRefs = GetBuildWorkItemsRefs(adoBuildUrls);
             if (!workItemsRefs.Succeeded)
             {
-                return ExtResult.Failure(workItemsRefs);
+                return SuccessOrErrorResult.Failure(workItemsRefs);
             }
 
             var workItemLinks = workItemsRefs.Value
@@ -197,7 +198,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 .Select(r => r.Value)
                 .Where(v => v != null)
                 .ToArray();
-            return ExtResult.Conditional(validWorkItemLinks, workItemLinks);
+            return SuccessOrErrorResult.Conditional(validWorkItemLinks, workItemLinks);
         }
     }
 }
