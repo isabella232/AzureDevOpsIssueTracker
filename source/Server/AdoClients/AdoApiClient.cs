@@ -57,7 +57,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription()}");
             }
 
             try
@@ -68,7 +68,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item references from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item references from Azure DevOps.");
             }
         }
 
@@ -84,7 +84,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
             }
 
             try
@@ -94,7 +94,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item details from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item details from Azure DevOps.");
             }
         }
 
@@ -112,7 +112,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ExtResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
             }
 
             string[] commentsHtml;
@@ -124,7 +124,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch
             {
-                return ExtResult.Failure("Unable to interpret work item comments from Azure DevOps.");
+                return SuccessOrErrorResult.Failure("Unable to interpret work item comments from Azure DevOps.");
             }
 
             return commentsHtml
@@ -151,7 +151,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var comments = GetWorkItemComments(adoProjectUrls, workItemId);
             if (!comments.Succeeded)
             {
-                return ExtResult.Failure(comments);
+                return SuccessOrErrorResult.Failure(comments);
             }
 
             var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -180,7 +180,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                         : workItemId.ToString()
             };
 
-            return ExtResult.Conditional(workItemLink, workItem, releaseNote);
+            return SuccessOrErrorResult.Conditional(workItemLink, workItem, releaseNote);
         }
 
         public SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls)
@@ -188,7 +188,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var workItemsRefs = GetBuildWorkItemsRefs(adoBuildUrls);
             if (!workItemsRefs.Succeeded)
             {
-                return ExtResult.Failure(workItemsRefs);
+                return SuccessOrErrorResult.Failure(workItemsRefs);
             }
 
             var workItemLinks = workItemsRefs.Value
@@ -198,7 +198,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 .Select(r => r.Value)
                 .Where(v => v != null)
                 .ToArray();
-            return ExtResult.Conditional(validWorkItemLinks, workItemLinks);
+            return SuccessOrErrorResult.Conditional(validWorkItemLinks, workItemLinks);
         }
     }
 }
