@@ -1,5 +1,5 @@
-﻿using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
-using Octopus.Shared.Model;
+﻿using Octopus.Data.Model;
+using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
