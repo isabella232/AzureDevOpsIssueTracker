@@ -92,7 +92,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
 
             Assert.IsFalse(workItemLinks.Succeeded);
-            Assert.AreEqual("Error while fetching work item comments from Azure DevOps: 500 (InternalServerError)", workItemLinks.FailureReason);
+            Assert.AreEqual("Error while fetching work item comments from Azure DevOps: 500 (InternalServerError).", workItemLinks.FailureReason);
             Assert.AreEqual(2, workItemLinks.Value.Length);
             Assert.AreEqual("5", workItemLinks.Value[0].Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=5", workItemLinks.Value[0].LinkUrl);

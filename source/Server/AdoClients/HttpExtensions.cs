@@ -13,7 +13,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         public static string ToDescription(this HttpStatusCode httpStatusCode)
         {
-            return $"{(int) httpStatusCode} ({httpStatusCode})";
+            var description = $"{(int) httpStatusCode} ({httpStatusCode}).";
+            if (httpStatusCode == HttpStatusCode.Unauthorized)
+            {
+                description += " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+            }
+            return description;
         }
     }
 }
