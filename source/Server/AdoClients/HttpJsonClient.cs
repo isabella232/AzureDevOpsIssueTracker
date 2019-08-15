@@ -28,6 +28,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             using (var response = httpClient.SendAsync(request).GetAwaiter().GetResult())
             {
+                // Work around servers that report auth failure with redirect to a status 203 html page (in violation of our Accept header)
+                if (response.StatusCode == HttpStatusCode.NonAuthoritativeInformation && response.Content?.Headers?.ContentType?.MediaType == "text/html")
+                {
+                    return (HttpStatusCode.Unauthorized, null);
+                }
+
                 return (
                     response.StatusCode,
                     ParseJsonOrDefault(response.Content)
