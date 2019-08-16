@@ -18,6 +18,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             {
                 description += " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
             }
+            else if (httpStatusCode == (HttpStatusCode) HttpJsonClientStatus.SigninPage)
+            {
+                description = "The server returned a sign-in page. Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+            }
+
             return description;
         }
     }
