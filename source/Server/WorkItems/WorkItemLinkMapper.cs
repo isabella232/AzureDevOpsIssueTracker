@@ -1,6 +1,6 @@
 ﻿using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.Extensions.WorkItems;
-using Octopus.Server.Extensibility.HostServices.Model.PackageMetadata;
+using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -21,14 +21,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public string CommentParser => AzureDevOpsConfigurationStore.CommentParser;
         public bool IsEnabled => store.GetIsEnabled();
 
-        public SuccessOrErrorResult<WorkItemLink[]> Map(OctopusPackageMetadata packageMetadata)
+        public SuccessOrErrorResult<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
         {
             if (!IsEnabled
-                || string.IsNullOrWhiteSpace(packageMetadata?.BuildUrl)
-                || packageMetadata.CommentParser != CommentParser)
+                || string.IsNullOrWhiteSpace(buildInformation?.BuildUrl))
                 return null;
 
-            return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(packageMetadata.BuildUrl));
+            return client.GetBuildWorkItemLinks(AdoBuildUrls.ParseBrowserUrl(buildInformation.BuildUrl));
         }
     }
 }
