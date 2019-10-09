@@ -23,7 +23,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 
         public SuccessOrErrorResult<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
         {
+            // For ADO, we should ignore anything that wasn't built by ADO because we get work items from the build
             if (!IsEnabled
+                || buildInformation?.BuildEnvironment != "Azure DevOps"
                 || string.IsNullOrWhiteSpace(buildInformation?.BuildUrl))
                 return null;
 
