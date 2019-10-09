@@ -177,7 +177,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                     ? releaseNote.Value
                     : !string.IsNullOrWhiteSpace(workItem.Value.title)
                         ? workItem.Value.title
-                        : workItemId.ToString()
+                        : workItemId.ToString(),
+                Source = AzureDevOpsConfigurationStore.CommentParser
             };
 
             return SuccessOrErrorResult.Conditional(workItemLink, workItem, releaseNote);

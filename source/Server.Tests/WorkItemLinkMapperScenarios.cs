@@ -1,10 +1,13 @@
 ﻿using System;
 using NSubstitute;
 using NUnit.Framework;
-using Octopus.Server.Extensibility.HostServices.Model.PackageMetadata;
+using Octopus.Server.Extensibility.Extensions;
+using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
+using Octopus.Server.Extensibility.HostServices.Model.IssueTrackers;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
+using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
@@ -23,23 +26,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         [Test]
         public void WhenDisabledReturnsNull()
         {
-            var links = CreateWorkItemLinkMapper(false).Map(new OctopusPackageMetadata
+            var links = CreateWorkItemLinkMapper(false).Map(new OctopusBuildInformation
             {
-                BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
-                CommentParser = AzureDevOpsConfigurationStore.CommentParser
-            });
-            Assert.IsTrue(links.Succeeded);
-            Assert.IsNull(links.Value);
-        }
-
-        [Test]
-        public void DoesNotAttemptToMapOtherCommentParsers()
-        {
-            // ReSharper disable once StringLiteralTypo
-            var links = CreateWorkItemLinkMapper(true).Map(new OctopusPackageMetadata
-            {
-                BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24",
-                CommentParser = "Jira"
+                BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
             });
             Assert.IsTrue(links.Succeeded);
             Assert.IsNull(links.Value);

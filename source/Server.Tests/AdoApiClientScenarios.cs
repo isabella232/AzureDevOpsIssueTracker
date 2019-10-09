@@ -46,6 +46,27 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             Assert.AreEqual("README has no useful content", workItemLink.Description);
         }
 
+        
+        [Test]
+        public void SourceGetsSet()
+        {
+            var store = CreateSubstituteStore();
+            var httpJsonClient = Substitute.For<IHttpJsonClient>();
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/build/builds/24/workitems?api-version=5.0", "rumor")
+                .Returns((HttpStatusCode.OK,
+                    JObject.Parse(@"{""count"":1,""value"":[{""id"":""2"",""url"":""http://redstoneblock/DefaultCollection/_apis/wit/workItems/2""}]}")));
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/2?api-version=5.0", "rumor")
+                .Returns((HttpStatusCode.OK,
+                    JObject.Parse(@"{""id"":2,""fields"":{""System.CommentCount"":0,""System.Title"": ""README has no useful content""}}")));
+
+            var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
+                AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
+
+            Assert.IsTrue(workItemLinks.Succeeded);
+            var workItemLink = workItemLinks.Value.Single();
+            Assert.AreEqual("Azure DevOps", workItemLink.Source);
+        }
+
         [Test]
         public void ClientCanRequestAndParseWorkItemsWithReleaseNotes()
         {
