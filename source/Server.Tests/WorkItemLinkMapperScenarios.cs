@@ -14,12 +14,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
     [TestFixture]
     public class WorkItemLinkMapperScenarios
     {
-        private WorkItemLinkMapper CreateWorkItemLinkMapper(bool enabled, Func<SuccessOrErrorResult<WorkItemLink[]>> callback = null)
+        private WorkItemLinkMapper CreateWorkItemLinkMapper(bool enabled)
         {
             var config = Substitute.For<IAzureDevOpsConfigurationStore>();
             config.GetIsEnabled().Returns(enabled);
             var adoApiClient = Substitute.For<IAdoApiClient>();
-            adoApiClient.GetBuildWorkItemLinks(null).ReturnsForAnyArgs(ci => callback?.Invoke() ?? throw new InvalidOperationException());
+            adoApiClient.GetBuildWorkItemLinks(null).ReturnsForAnyArgs(ci => throw new InvalidOperationException());
             return new WorkItemLinkMapper(config, adoApiClient);
         }
 
