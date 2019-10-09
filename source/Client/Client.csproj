@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Octopus.Client" Version="6.3.2" />
+    <PackageReference Include="Octopus.Client" Version="7.2.0" />
   </ItemGroup>
 
 </Project>
