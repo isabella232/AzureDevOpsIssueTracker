@@ -108,6 +108,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 .Returns((HttpStatusCode.InternalServerError, null));
             httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/6?api-version=5.0", "rumor")
                 .Returns((HttpStatusCode.InternalServerError, null));
+            httpJsonClient.Get("http://redstoneblock/DefaultCollection/Deployable/_apis/wit/workitems/6/comments?api-version=5.0-preview.2", "rumor")
+                .Returns((HttpStatusCode.InternalServerError, null));
 
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
