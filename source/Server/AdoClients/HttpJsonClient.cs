@@ -7,21 +7,53 @@ using Newtonsoft.Json.Linq;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    public interface IHttpJsonClient : IDisposable
+    public class HttpJsonClientStatus
     {
-        (HttpStatusCode status, JObject jObject) Get(string url, string basicPassword = null);
+        public HttpStatusCode HttpStatusCode { get; set; }
+        public bool SignInPage { get; set; }
+        public string ErrorMessage { get; set; }
+
+        public bool IsSuccessStatusCode()
+        {
+            return HttpStatusCode >= HttpStatusCode.OK
+                   && HttpStatusCode <= (HttpStatusCode) 299;
+        }
+
+        public string ToDescription()
+        {
+            if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                return ErrorMessage;
+            }
+
+            if (SignInPage)
+            {
+                return "The server returned a sign-in page."
+                       + " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+            }
+
+            var description = $"{(int) HttpStatusCode} ({HttpStatusCode}).";
+            if (HttpStatusCode == HttpStatusCode.Unauthorized)
+            {
+                description += " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+            }
+
+            return description;
+        }
+
+        public static implicit operator HttpJsonClientStatus(HttpStatusCode code) => new HttpJsonClientStatus {HttpStatusCode = code};
     }
 
-    public enum HttpJsonClientStatus
+    public interface IHttpJsonClient : IDisposable
     {
-        SigninPage = -203
+        (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null);
     }
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
         private readonly HttpClient httpClient = new HttpClient();
 
-        public (HttpStatusCode status, JObject jObject) Get(string url, string basicPassword = null)
+        public (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -31,14 +63,24 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(":" + basicPassword)));
             }
 
-            using (var response = httpClient.SendAsync(request).GetAwaiter().GetResult())
+            HttpResponseMessage response;
+            try
+            {
+                response = httpClient.SendAsync(request).GetAwaiter().GetResult();
+            }
+            catch (HttpRequestException ex)
+            {
+                return (new HttpJsonClientStatus {ErrorMessage = ex.Message}, null);
+            }
+
+            using (response)
             {
                 // Work around servers that report auth failure with redirect to a status 203 html page (in violation of our Accept header)
                 if (response.Content?.Headers?.ContentType?.MediaType == "text/html"
                     && (response.StatusCode == HttpStatusCode.NonAuthoritativeInformation
                         || response.RequestMessage.RequestUri.AbsolutePath.Contains(@"signin")))
                 {
-                    return ((HttpStatusCode) HttpJsonClientStatus.SigninPage, null);
+                    return (new HttpJsonClientStatus {SignInPage = true}, null);
                 }
 
                 return (
