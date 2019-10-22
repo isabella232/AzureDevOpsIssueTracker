@@ -70,7 +70,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
             catch (HttpRequestException ex)
             {
-                return (new HttpJsonClientStatus {ErrorMessage = ex.Message}, null);
+                var message = ex.InnerException is WebException wex
+                    ? wex.Message
+                    : ex.Message;
+                return (new HttpJsonClientStatus {ErrorMessage = message}, null);
             }
 
             using (response)
