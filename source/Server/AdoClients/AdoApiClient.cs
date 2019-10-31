@@ -50,7 +50,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
 
             var (status, jObject) = client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls));
-            if (status == HttpStatusCode.NotFound)
+            if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return new (int, string)[0];
             }
@@ -77,7 +77,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
                 GetPersonalAccessToken(adoProjectUrls));
-            if (status == HttpStatusCode.NotFound)
+            if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return (workItemId.ToString(), 0);
             }
@@ -105,7 +105,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=5.0-preview.2",
                 GetPersonalAccessToken(adoProjectUrls));
 
-            if (status == HttpStatusCode.NotFound)
+            if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return new string[0];
             }
