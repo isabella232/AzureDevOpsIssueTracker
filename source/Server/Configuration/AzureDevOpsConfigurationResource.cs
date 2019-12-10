@@ -19,7 +19,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         public string BaseUrl { get; set; }
 
         public const string PersonalAccessTokenDescription =
-            "A Personal Access Token authorized to read scopes 'Build' and 'Work items', added under User Settings.";
+            "A Personal Access Token (PAT) authorized to read scopes 'Build' and 'Work items', added under User Settings.";
 
         [DisplayName("Personal Access Token")]
         [Description(PersonalAccessTokenDescription)]
