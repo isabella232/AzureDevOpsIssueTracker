@@ -156,7 +156,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 return SuccessOrErrorResult.Failure(comments);
             }
 
-            var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.IgnoreCase);
             // Return (last, if multiple found) comment that matched release note prefix
             var releaseNoteComment = comments.Value
                 ?.LastOrDefault(ct => releaseNoteRegex.IsMatch(ct ?? ""));

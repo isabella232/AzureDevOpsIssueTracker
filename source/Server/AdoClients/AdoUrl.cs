@@ -19,8 +19,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             {
                 if (string.Equals(uri.Host, "dev.azure.com", StringComparison.OrdinalIgnoreCase)
-                    && Regex.Match(uri.AbsolutePath, @"^/(?<org>[^/]+)(/(?<proj>[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*))?",
-                            RegexOptions.Compiled)
+                    && Regex.Match(uri.AbsolutePath, @"^/(?<org>[^/]+)(/(?<proj>[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*))?")
                         is Match match && match.Success)
                 {
                     var orgUri = new Uri(uri, $"/{match.Groups["org"].Value}");
@@ -36,9 +35,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             {
                 var match = Regex.Match(uri.AbsolutePath,
-                    @"^(?<prefix>/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*)?/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*",
-                    RegexOptions.Compiled);
-                var isVsUrl = Regex.IsMatch(uri.Host, @"^[^.]+\.visualstudio\.com$", RegexOptions.Compiled);
+                    @"^(?<prefix>/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*)?/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*");
+                var isVsUrl = Regex.IsMatch(uri.Host, @"^[^.]+\.visualstudio\.com$");
                 var projectIsSpecified = match.Success
                                          && (match.Groups["prefix"].Success || isVsUrl);
                 var collectionPath = match.Groups["prefix"].Success
@@ -71,7 +69,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             try
             {
-                var prefixMatch = Regex.Match(browserUrl, @"^\s*((https?://.+?)/+[^\/]+)/+_build\b", RegexOptions.Compiled);
+                var prefixMatch = Regex.Match(browserUrl, @"^\s*((https?://.+?)/+[^\/]+)/+_build\b");
                 if (!prefixMatch.Success)
                 {
                     throw ParseError();
