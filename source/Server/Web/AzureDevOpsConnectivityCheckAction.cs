@@ -41,8 +41,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
                 if (string.IsNullOrEmpty(baseUrl))
                 {
-                    context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure(
-                        string.IsNullOrEmpty(baseUrl) ? "Please provide a value for Azure DevOps Base Url." : null));
+                    context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure("Please provide a value for Azure DevOps Base Url."));
                     return;
                 }
 
