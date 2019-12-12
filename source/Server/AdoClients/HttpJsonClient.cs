@@ -26,12 +26,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 return ErrorMessage;
             }
 
+            var authMessage = disableSettingsHints
+                ? $" Please confirm you are using a Personal Access Token authorized {HttpJsonClient.AuthMessageScope}."
+                : $" Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings, and is authorized {HttpJsonClient.AuthMessageScope}.";
             if (SignInPage)
             {
-                return "The server returned a sign-in page."
-                       + (disableSettingsHints
-                           ? ""
-                           : " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.");
+                return "The server returned a sign-in page." + authMessage;
             }
 
             var description = $"{(int) HttpStatusCode} ({HttpStatusCode}).";
@@ -43,9 +43,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (HttpStatusCode == HttpStatusCode.Unauthorized)
             {
-                description += disableSettingsHints
-                    ? " Please confirm you are using a Personal Access Token authorized for this scope."
-                    : " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings, and is authorized for this scope.";
+                description += authMessage;
             }
 
             return description;
@@ -61,6 +59,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
+        public static string AuthMessageScope = "for this scope";
+
         private readonly HttpClient httpClient = new HttpClient();
 
         public (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null)
