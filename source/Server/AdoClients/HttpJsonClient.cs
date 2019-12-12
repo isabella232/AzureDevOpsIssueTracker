@@ -19,7 +19,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                    && HttpStatusCode <= (HttpStatusCode) 299;
         }
 
-        public string ToDescription()
+        public string ToDescription(JObject jObject = null, bool disableSettingsHints = false)
         {
             if (!string.IsNullOrWhiteSpace(ErrorMessage))
             {
@@ -29,13 +29,23 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             if (SignInPage)
             {
                 return "The server returned a sign-in page."
-                       + " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+                       + (disableSettingsHints
+                           ? ""
+                           : " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.");
             }
 
             var description = $"{(int) HttpStatusCode} ({HttpStatusCode}).";
+            var bodyMessage = jObject?["message"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(bodyMessage))
+            {
+                description += $" \"{bodyMessage}\"";
+            }
+
             if (HttpStatusCode == HttpStatusCode.Unauthorized)
             {
-                description += " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+                description += disableSettingsHints
+                    ? " Please confirm you are using a Personal Access Token authorized for this scope."
+                    : " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings, and is authorized for this scope.";
             }
 
             return description;
