@@ -15,12 +15,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             "https://dev.azure.com/Barsonax",
             "https://dev.azure.com/Barsonax/Singularity",
             160)]
-        public void ValidBuildBrowserUrlsAreParsedCorrectly(string browserUrl, string expOrgUrl, string expProjUrl, int expBuildId)
+        public void ValidBuildBrowserUrlsAreParsedCorrectly(string browserUrl, string expectedOrgUrl, string expectedProjUrl, int expectedBuildId)
         {
             var abu = AdoBuildUrls.ParseBrowserUrl(browserUrl);
-            Assert.AreEqual(expOrgUrl, abu.OrganizationUrl);
-            Assert.AreEqual(expProjUrl, abu.ProjectUrl);
-            Assert.AreEqual(expBuildId, abu.BuildId);
+            Assert.AreEqual(expectedOrgUrl, abu.OrganizationUrl);
+            Assert.AreEqual(expectedProjUrl, abu.ProjectUrl);
+            Assert.AreEqual(expectedBuildId, abu.BuildId);
         }
 
         [TestCase(null)]
@@ -62,11 +62,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             "http://redstoneblock/DefaultCollection/e120aadd-7a70-4267-9a59-e32c3ebf4e8f/_apis/build/builds?api-version=4.1",
             "http://redstoneblock/DefaultCollection",
             "http://redstoneblock/DefaultCollection/e120aadd-7a70-4267-9a59-e32c3ebf4e8f")]
-        public void ValidOrganizationAndProjectUrlsAreParsedCorrectly(string organizationOrProjectUrl, string expOrgUrl, string expProjUrl)
+        public void ValidOrganizationAndProjectUrlsAreParsedCorrectly(string organizationOrProjectUrl, string expectedOrgUrl, string expectedProjUrl)
         {
             var apu = AdoProjectUrls.ParseOrganizationAndProjectUrls(organizationOrProjectUrl);
-            Assert.AreEqual(expOrgUrl, apu.OrganizationUrl);
-            Assert.AreEqual(expProjUrl, apu.ProjectUrl);
+            Assert.AreEqual(expectedOrgUrl, apu.OrganizationUrl);
+            Assert.AreEqual(expectedProjUrl, apu.ProjectUrl);
         }
     }
 }
