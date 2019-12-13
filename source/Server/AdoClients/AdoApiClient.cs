@@ -12,13 +12,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     public interface IAdoApiClient
     {
+        SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken = null, bool testing = false);
+
+        SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId, string personalAccessToken = null,
+            bool testing = false);
+
         SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
+        SuccessOrErrorResult<string[]> GetProjectList(AdoUrl adoUrl, string personalAccessToken = null, bool testing = false);
     }
 
     public class AdoApiClient : IAdoApiClient
     {
-        private const string ApiVersionQuery = @"?api-version=5.0";
-
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
         private readonly HtmlConvert htmlConvert;
@@ -44,12 +48,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
+        public SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken = null,
+            bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
-            var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems{ApiVersionQuery}";
+            var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems?api-version=4.1";
 
-            var (status, jObject) = client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls));
+            var (status, jObject) = client.Get(workItemsUrl, personalAccessToken ?? GetPersonalAccessToken(adoBuildUrls));
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return new (int, string)[0];
@@ -57,7 +62,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return SuccessOrErrorResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item references from Azure DevOps: {status.ToDescription(jObject, testing)}");
             }
 
             try
@@ -72,11 +77,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
+        public SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
+            string personalAccessToken = null, bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
-            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}{ApiVersionQuery}",
-                GetPersonalAccessToken(adoProjectUrls));
+            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1",
+                personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return (workItemId.ToString(), 0);
@@ -84,7 +90,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription(jObject, testing)}");
             }
 
             try
@@ -102,7 +108,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public SuccessOrErrorResult<string[]> GetWorkItemComments(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
-            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=5.0-preview.2",
+            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=4.1-preview.2",
                 GetPersonalAccessToken(adoProjectUrls));
 
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
@@ -112,7 +118,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return SuccessOrErrorResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription()}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item comments from Azure DevOps: {status.ToDescription(jObject)}");
             }
 
             string[] commentsHtml;
@@ -154,7 +160,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 return SuccessOrErrorResult.Failure(comments);
             }
 
-            var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.IgnoreCase);
             // Return (last, if multiple found) comment that matched release note prefix
             var releaseNoteComment = comments.Value
                 ?.LastOrDefault(ct => releaseNoteRegex.IsMatch(ct ?? ""));
@@ -200,6 +206,21 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 .Where(v => v != null)
                 .ToArray();
             return SuccessOrErrorResult.Conditional(validWorkItemLinks, workItemLinks);
+        }
+
+        public SuccessOrErrorResult<string[]> GetProjectList(AdoUrl adoUrl, string personalAccessToken = null, bool testing = false)
+        {
+            var (status, jObject) = client.Get($"{adoUrl.OrganizationUrl}/_apis/projects?api-version=4.1",
+                personalAccessToken ?? GetPersonalAccessToken(adoUrl));
+
+            if (!status.IsSuccessStatusCode())
+            {
+                return SuccessOrErrorResult.Failure($"Error while fetching project list from Azure DevOps: {status.ToDescription(jObject, testing)}");
+            }
+
+            return jObject["value"]
+                .Select(p => p["name"].ToString())
+                .ToArray();
         }
     }
 }

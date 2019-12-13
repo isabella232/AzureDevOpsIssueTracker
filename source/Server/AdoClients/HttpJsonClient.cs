@@ -19,23 +19,31 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                    && HttpStatusCode <= (HttpStatusCode) 299;
         }
 
-        public string ToDescription()
+        public string ToDescription(JObject jObject = null, bool disableSettingsHints = false)
         {
             if (!string.IsNullOrWhiteSpace(ErrorMessage))
             {
                 return ErrorMessage;
             }
 
+            var authMessage = disableSettingsHints
+                ? $" Please confirm you are using a Personal Access Token authorized {HttpJsonClient.AuthMessageScope}."
+                : $" Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings, and is authorized {HttpJsonClient.AuthMessageScope}.";
             if (SignInPage)
             {
-                return "The server returned a sign-in page."
-                       + " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+                return "The server returned a sign-in page." + authMessage;
             }
 
             var description = $"{(int) HttpStatusCode} ({HttpStatusCode}).";
+            var bodyMessage = jObject?["message"]?.ToString();
+            if (!string.IsNullOrWhiteSpace(bodyMessage))
+            {
+                description += $" \"{bodyMessage}\"";
+            }
+
             if (HttpStatusCode == HttpStatusCode.Unauthorized)
             {
-                description += " Please confirm the Personal Access Token is configured correctly in Azure DevOps Issue Tracker settings.";
+                description += authMessage;
             }
 
             return description;
@@ -51,6 +59,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     public sealed class HttpJsonClient : IHttpJsonClient
     {
+        public static string AuthMessageScope = "for this scope";
+
         private readonly HttpClient httpClient = new HttpClient();
 
         public (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null)

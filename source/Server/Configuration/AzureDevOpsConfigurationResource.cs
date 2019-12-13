@@ -10,7 +10,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     public class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
         public const string BaseUrlDisplayName = "Azure DevOps Base Url";
-        public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection.";
+        public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
 
         [DisplayName(BaseUrlDisplayName)]
         [Description(BaseUrlDescription)]
@@ -24,6 +24,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [DisplayName("Personal Access Token")]
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
+        [AllowConnectivityCheck("Azure DevOps configuration", AzureDevOpsIssueTrackerApi.ApiConnectivityCheck, nameof(BaseUrl), nameof(PersonalAccessToken))]
         public SensitiveValue PersonalAccessToken { get; set; }
 
         [DisplayName("Release Note Options")]
