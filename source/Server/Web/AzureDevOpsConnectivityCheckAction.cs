@@ -77,23 +77,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 string lastFailureReason = null;
                 foreach (var projectUrl in projectUrls)
                 {
-                    var builds = adoApiClient.GetBuildList(projectUrl, personalAccessToken, true);
-                    if (!builds.Succeeded)
+                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken, true);
+                    if (!buildScopeTest.Succeeded)
                     {
-                        lastFailureReason = builds.FailureReason;
+                        lastFailureReason = buildScopeTest.FailureReason;
                         continue;
                     }
 
-                    if (!builds.Value.Any())
+                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken, true);
+                    if (!workItemScopeTest.Succeeded)
                     {
-                        lastFailureReason = "Successfully connected, but unable to find any builds to test permissions.";
-                        continue;
-                    }
-
-                    var workItems = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, builds.Value.First()), personalAccessToken, true);
-                    if (!workItems.Succeeded)
-                    {
-                        lastFailureReason = workItems.FailureReason;
+                        lastFailureReason = workItemScopeTest.FailureReason;
                         continue;
                     }
 

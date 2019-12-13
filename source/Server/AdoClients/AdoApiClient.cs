@@ -12,10 +12,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     public interface IAdoApiClient
     {
+        SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken = null, bool testing = false);
+
+        SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId, string personalAccessToken = null,
+            bool testing = false);
+
         SuccessOrErrorResult<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
         SuccessOrErrorResult<string[]> GetProjectList(AdoUrl adoUrl, string personalAccessToken = null, bool testing = false);
-        SuccessOrErrorResult<int[]> GetBuildList(AdoProjectUrls adoProjectUrls, string personalAccessToken = null, bool testing = false);
-        SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken = null, bool testing = false);
     }
 
     public class AdoApiClient : IAdoApiClient
@@ -74,11 +77,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
+        public SuccessOrErrorResult<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
+            string personalAccessToken = null, bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1",
-                GetPersonalAccessToken(adoProjectUrls));
+                personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return (workItemId.ToString(), 0);
@@ -86,7 +90,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription(jObject)}");
+                return SuccessOrErrorResult.Failure($"Error while fetching work item details from Azure DevOps: {status.ToDescription(jObject, testing)}");
             }
 
             try
@@ -216,21 +220,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             return jObject["value"]
                 .Select(p => p["name"].ToString())
-                .ToArray();
-        }
-
-        public SuccessOrErrorResult<int[]> GetBuildList(AdoProjectUrls adoProjectUrls, string personalAccessToken = null, bool testing = false)
-        {
-            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/build/builds?api-version=4.1",
-                personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
-
-            if (!status.IsSuccessStatusCode())
-            {
-                return SuccessOrErrorResult.Failure($"Error while fetching build list from Azure DevOps: {status.ToDescription(jObject, testing)}");
-            }
-
-            return jObject["value"]
-                .Select(b => (int) b["id"])
                 .ToArray();
         }
     }
