@@ -10,7 +10,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
         public const string ApiConnectivityCheck = "/api/azuredevopsissuetracker/connectivitycheck";
 
         public AzureDevOpsIssueTrackerApi(
-            Func<SecuredAsyncActionInvoker<AzureDevOpsConnectivityCheckAction, IAzureDevOpsConfigurationStore>> azureDevOpsConnectivityCheckInvokerFactory)
+            Func<SecuredAsyncActionInvoker<AzureDevOpsConnectivityCheckAction>> azureDevOpsConnectivityCheckInvokerFactory)
         {
             Add("POST", ApiConnectivityCheck, azureDevOpsConnectivityCheckInvokerFactory().ExecuteAsync);
         }
