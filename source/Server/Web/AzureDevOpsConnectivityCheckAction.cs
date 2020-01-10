@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
-using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web.Response;
+using Octopus.Server.Extensibility.Resources.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
@@ -24,6 +24,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
         public async Task ExecuteAsync(OctoContext context)
         {
+            var connectivityCheckResponse = new ConnectivityCheckResponse();
+
             try
             {
                 var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
@@ -41,7 +43,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
                 if (string.IsNullOrEmpty(baseUrl))
                 {
-                    context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure("Please provide a value for Azure DevOps Base Url."));
+                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Please provide a value for Azure DevOps Base Url.");
+                    context.Response.AsOctopusJson(connectivityCheckResponse);
                     return;
                 }
 
@@ -56,14 +59,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                     var projects = adoApiClient.GetProjectList(urls, personalAccessToken, true);
                     if (!projects.Succeeded)
                     {
-                        context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure(projects.FailureReason));
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, projects.FailureReason);
+                        context.Response.AsOctopusJson(connectivityCheckResponse);
                         return;
                     }
 
                     if (!projects.Value.Any())
                     {
-                        context.Response.AsOctopusJson(
-                            ConnectivityCheckResponse.Failure("Successfully connected, but unable to find any projects to test permissions."));
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Successfully connected, but unable to find any projects to test permissions.");
+                        context.Response.AsOctopusJson(connectivityCheckResponse);
                         return;
                     }
 
@@ -74,32 +78,41 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                     }).ToArray();
                 }
 
-                string lastFailureReason = null;
                 foreach (var projectUrl in projectUrls)
                 {
                     var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken, true);
                     if (!buildScopeTest.Succeeded)
                     {
-                        lastFailureReason = buildScopeTest.FailureReason;
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeTest.FailureReason);
                         continue;
                     }
 
                     var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken, true);
                     if (!workItemScopeTest.Succeeded)
                     {
-                        lastFailureReason = workItemScopeTest.FailureReason;
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeTest.FailureReason);
                         continue;
                     }
 
-                    context.Response.AsOctopusJson(ConnectivityCheckResponse.Success);
+                    // the check has been successful, so ignore any messages that came from previous project checks
+                    connectivityCheckResponse = new ConnectivityCheckResponse();
+                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Azure DevOps connection was tested successfully");
+                    if (!configurationStore.GetIsEnabled())
+                    {
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
+                        return;
+                    }
+
+                    context.Response.AsOctopusJson(connectivityCheckResponse);
                     return;
                 }
 
-                context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure(lastFailureReason));
+                context.Response.AsOctopusJson(connectivityCheckResponse);
             }
             catch (Exception ex)
             {
-                context.Response.AsOctopusJson(ConnectivityCheckResponse.Failure(ex.ToString()));
+                connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, ex.ToString());
+                context.Response.AsOctopusJson(connectivityCheckResponse);
             }
         }
     }
