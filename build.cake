@@ -112,6 +112,9 @@ Task("__Pack")
 
 		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"*.{extensionName}.dll"), extPublishDir);
 		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"HtmlAgilityPack.dll"), extPublishDir);
+		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Extensions.dll"), extPublishDir);
+		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Formatting.dll"), extPublishDir);
+		CopyFiles(Path.Combine("source", "Server", "bin", "Release", "net452", $"System.Net.Http.Primitives.dll"), extPublishDir);
 
         NuGetPack(Path.Combine(extPublishDir, "Server.nuspec"), new NuGetPackSettings {
             Version = nugetVersion,
