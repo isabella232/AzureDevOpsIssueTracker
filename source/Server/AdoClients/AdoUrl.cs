@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using System.Web;
 using System.Text.RegularExpressions;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
@@ -79,7 +79,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 {
                     OrganizationUrl = prefixMatch.Groups[2].Value,
                     ProjectUrl = prefixMatch.Groups[1].Value,
-                    BuildId = int.Parse(new Uri(browserUrl, UriKind.Absolute).ParseQueryString()["buildId"])
+                    BuildId = int.Parse(HttpUtility.ParseQueryString(browserUrl)["buildId"])
                 };
             }
             catch (Exception ex)

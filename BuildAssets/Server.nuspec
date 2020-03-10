@@ -20,7 +20,6 @@
     <developmentDependency>true</developmentDependency>
     <dependencies>
       <dependency id="HtmlAgilityPack" version="1.11.4" />
-      <dependency id="System.Net.Http.Formatting.Extension" version="5.2.3" />
     </dependencies>
   </metadata>
   <files>
