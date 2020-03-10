@@ -2,7 +2,7 @@
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    public interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStore<AzureDevOpsConfiguration>
+    interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStore<AzureDevOpsConfiguration>
     {
         string GetBaseUrl();
         void SetBaseUrl(string baseUrl);

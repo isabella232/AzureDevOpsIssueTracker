@@ -10,7 +10,7 @@ using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    public interface IAdoApiClient
+    interface IAdoApiClient
     {
         SuccessOrErrorResult<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string personalAccessToken = null, bool testing = false);
 
@@ -21,7 +21,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         SuccessOrErrorResult<string[]> GetProjectList(AdoUrl adoUrl, string personalAccessToken = null, bool testing = false);
     }
 
-    public class AdoApiClient : IAdoApiClient
+    class AdoApiClient : IAdoApiClient
     {
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;

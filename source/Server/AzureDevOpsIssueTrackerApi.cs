@@ -5,7 +5,7 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 {
-    public class AzureDevOpsIssueTrackerApi : RegisterEndpoint
+    class AzureDevOpsIssueTrackerApi : RegisterEndpoint
     {
         public const string ApiConnectivityCheck = "/api/azuredevopsissuetracker/connectivitycheck";
 

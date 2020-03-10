@@ -5,7 +5,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    public class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
+    class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
     {
         readonly ILog log;
         readonly Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration;

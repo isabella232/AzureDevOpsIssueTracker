@@ -3,7 +3,7 @@ using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 {
-    public class AzureDevOpsIssueTracker : IIssueTracker
+    class AzureDevOpsIssueTracker : IIssueTracker
     {
         internal static string Name = "Azure DevOps";
 

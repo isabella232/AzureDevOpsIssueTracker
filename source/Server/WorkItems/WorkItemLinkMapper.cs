@@ -7,7 +7,7 @@ using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
-    public class WorkItemLinkMapper : IWorkItemLinkMapper
+    class WorkItemLinkMapper : IWorkItemLinkMapper
     {
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IAdoApiClient client;

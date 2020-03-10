@@ -3,7 +3,7 @@ using Octopus.Server.Extensibility.HostServices.Web;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
 {
-    public class AzureDevOpsIssueTrackerHomeLinksContributor : IHomeLinksContributor
+    class AzureDevOpsIssueTrackerHomeLinksContributor : IHomeLinksContributor
     {
         public IDictionary<string, string> GetLinksToContribute()
         {

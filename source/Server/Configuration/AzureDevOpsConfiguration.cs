@@ -3,7 +3,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    public class AzureDevOpsConfiguration : ExtensionConfigurationDocument
+    class AzureDevOpsConfiguration : ExtensionConfigurationDocument
     {
         public AzureDevOpsConfiguration() : base("AzureDevOps", "Octopus Deploy", "1.0")
         {
@@ -18,7 +18,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         public ReleaseNoteOptions ReleaseNoteOptions { get; set; } = new ReleaseNoteOptions();
     }
 
-    public class ReleaseNoteOptions
+    class ReleaseNoteOptions
     {
         public string ReleaseNotePrefix { get; set; }
     }

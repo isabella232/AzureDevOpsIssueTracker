@@ -7,7 +7,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     [Description("Configure the Azure DevOps Issue Tracker. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
-    public class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
+    class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
         public const string BaseUrlDisplayName = "Azure DevOps Base Url";
         public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
@@ -31,7 +31,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         public ReleaseNoteOptionsResource ReleaseNoteOptions { get; set; } = new ReleaseNoteOptionsResource();
     }
 
-    public class ReleaseNoteOptionsResource
+    class ReleaseNoteOptionsResource
     {
         public const string ReleaseNotePrefixDescription =
             "Set the prefix to look for when finding release notes for Azure DevOps issues. For example `Release note:`.";

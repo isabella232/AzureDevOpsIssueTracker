@@ -4,12 +4,12 @@ using System.Text.RegularExpressions;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    public class AdoUrl
+    class AdoUrl
     {
         public string OrganizationUrl { get; set; }
     }
 
-    public class AdoProjectUrls : AdoUrl
+    class AdoProjectUrls : AdoUrl
     {
         public string ProjectUrl { get; set; }
 
@@ -58,7 +58,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         }
     }
 
-    public class AdoBuildUrls : AdoProjectUrls
+    class AdoBuildUrls : AdoProjectUrls
     {
         public int BuildId { get; set; }
 

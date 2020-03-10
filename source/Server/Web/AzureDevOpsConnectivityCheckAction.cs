@@ -11,7 +11,7 @@ using Octopus.Server.Extensibility.Resources.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
-    public class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
+    class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
     {
         private readonly IAzureDevOpsConfigurationStore configurationStore;
         private readonly IAdoApiClient adoApiClient;

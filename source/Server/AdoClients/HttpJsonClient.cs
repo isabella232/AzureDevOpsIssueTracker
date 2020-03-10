@@ -8,7 +8,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
-    public class HttpJsonClientStatus
+    class HttpJsonClientStatus
     {
         public HttpStatusCode HttpStatusCode { get; set; }
         public bool SignInPage { get; set; }
@@ -53,12 +53,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         public static implicit operator HttpJsonClientStatus(HttpStatusCode code) => new HttpJsonClientStatus {HttpStatusCode = code};
     }
 
-    public interface IHttpJsonClient : IDisposable
+    interface IHttpJsonClient : IDisposable
     {
         (HttpJsonClientStatus status, JObject jObject) Get(string url, string basicPassword = null);
     }
 
-    public sealed class HttpJsonClient : IHttpJsonClient
+    sealed class HttpJsonClient : IHttpJsonClient
     {
         public static string AuthMessageScope = "for this scope";
 

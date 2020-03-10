@@ -7,7 +7,7 @@ using Octopus.Diagnostics;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
 {
-    public class HtmlConvert
+    class HtmlConvert
     {
         private static readonly IReadOnlyDictionary<string, bool> NewlineElementNames =
             // ReSharper disable once StringLiteralTypo

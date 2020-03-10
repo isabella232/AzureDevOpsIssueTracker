@@ -3,7 +3,7 @@ using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    public class AzureDevOpsConfigurationStore : ExtensionConfigurationStore<AzureDevOpsConfiguration>,
+    class AzureDevOpsConfigurationStore : ExtensionConfigurationStore<AzureDevOpsConfiguration>,
         IAzureDevOpsConfigurationStore
     {
         public static string CommentParser = "Azure DevOps";
