@@ -75,11 +75,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                     throw ParseError();
                 }
 
+                var fullUri = new Uri(browserUrl);
+                var queryParams = HttpUtility.ParseQueryString(fullUri.Query);
+                var buildId = queryParams["buildId"];
                 return new AdoBuildUrls
                 {
                     OrganizationUrl = prefixMatch.Groups[2].Value,
                     ProjectUrl = prefixMatch.Groups[1].Value,
-                    BuildId = int.Parse(HttpUtility.ParseQueryString(browserUrl)["buildId"])
+                    BuildId = int.Parse(buildId)
                 };
             }
             catch (Exception ex)
