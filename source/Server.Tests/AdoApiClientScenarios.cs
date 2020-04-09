@@ -3,6 +3,7 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
+using Octopus.Data.Model;
 using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
@@ -19,7 +20,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         {
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
             store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
-            store.GetPersonalAccessToken().Returns("rumor");
+            store.GetPersonalAccessToken().Returns("rumor".ToSensitiveString());
             store.GetReleaseNotePrefix().Returns("= Changelog =");
             return store;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Octopus.Data.Model;
 using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
@@ -36,7 +37,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             yield return new ConfigureCommandOption("AzureDevOpsPersonalAccessToken=", AzureDevOpsConfigurationResource.PersonalAccessTokenDescription,
                 v =>
                 {
-                    azureDevOpsConfiguration.Value.SetPersonalAccessToken(v);
+                    azureDevOpsConfiguration.Value.SetPersonalAccessToken(v.ToSensitiveString());
                     log.Info($"Azure DevOps Issue Tracker integration personal access token set to: {v}");
                 });
         }

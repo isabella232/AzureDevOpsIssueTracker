@@ -1,4 +1,5 @@
-﻿using Octopus.Data.Storage.Configuration;
+﻿using Octopus.Data.Model;
+using Octopus.Data.Storage.Configuration;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
@@ -25,8 +26,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             SetProperty(doc => doc.BaseUrl = baseUrl?.Trim('/'));
         }
 
-        public string GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
-        public void SetPersonalAccessToken(string value) => SetProperty(doc => doc.PersonalAccessToken = value);
+        public SensitiveString GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
+        public void SetPersonalAccessToken(SensitiveString value) => SetProperty(doc => doc.PersonalAccessToken = value);
         public string GetReleaseNotePrefix() => GetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix);
         public void SetReleaseNotePrefix(string releaseNotePrefix) => SetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix = releaseNotePrefix);
     }

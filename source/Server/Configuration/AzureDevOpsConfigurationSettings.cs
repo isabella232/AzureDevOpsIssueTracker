@@ -27,7 +27,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                 isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetBaseUrl()),
                 AzureDevOpsConfigurationResource.BaseUrlDisplayName);
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
-                ConfigurationDocumentStore.GetPersonalAccessToken(),
+                ConfigurationDocumentStore.GetPersonalAccessToken()?.Value,
                 false, "Azure DevOps Personal Access Token");
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsReleaseNotePrefix",
                 ConfigurationDocumentStore.GetReleaseNotePrefix(),
