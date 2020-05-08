@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.HostServices.Mapping;
 
@@ -26,8 +27,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsBaseUrl", ConfigurationDocumentStore.GetBaseUrl(),
                 isEnabled && !string.IsNullOrWhiteSpace(ConfigurationDocumentStore.GetBaseUrl()),
                 AzureDevOpsConfigurationResource.BaseUrlDisplayName);
-            yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
-                ConfigurationDocumentStore.GetPersonalAccessToken()?.Value,
+            yield return new ConfigurationValue<SensitiveString>("Octopus.IssueTracker.AzureDevOpsPersonalAccessToken",
+                ConfigurationDocumentStore.GetPersonalAccessToken(),
                 false, "Azure DevOps Personal Access Token");
             yield return new ConfigurationValue<string>("Octopus.IssueTracker.AzureDevOpsReleaseNotePrefix",
                 ConfigurationDocumentStore.GetReleaseNotePrefix(),
