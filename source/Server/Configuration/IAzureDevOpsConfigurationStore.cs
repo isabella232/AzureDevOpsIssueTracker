@@ -1,4 +1,5 @@
-﻿using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
+﻿using Octopus.Data.Model;
+using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
@@ -7,8 +8,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         string GetBaseUrl();
         void SetBaseUrl(string baseUrl);
 
-        string GetPersonalAccessToken();
-        void SetPersonalAccessToken(string value);
+        SensitiveString GetPersonalAccessToken();
+        void SetPersonalAccessToken(SensitiveString value);
         string GetReleaseNotePrefix();
         void SetReleaseNotePrefix(string releaseNotePrefix);
     }

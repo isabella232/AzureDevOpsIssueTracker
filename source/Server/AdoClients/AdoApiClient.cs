@@ -39,7 +39,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             try
             {
                 return new Uri(store.GetBaseUrl().TrimEnd('/'), UriKind.Absolute).IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute))
-                    ? store.GetPersonalAccessToken()
+                    ? store.GetPersonalAccessToken()?.Value
                     : null;
             }
             catch

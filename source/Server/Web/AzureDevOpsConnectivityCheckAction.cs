@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
@@ -35,8 +36,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 // If PersonalAccessToken here is null, it could be that they're clicking the test connectivity button after saving
                 // the configuration as we won't have the value of the PersonalAccessToken on client side, so we need to retrieve it
                 // from the database
-                var personalAccessToken = request.GetValue("PersonalAccessToken").ToString();
-                if (string.IsNullOrEmpty(personalAccessToken))
+                var personalAccessToken = request.GetValue("PersonalAccessToken").ToString().ToSensitiveString();
+                if (string.IsNullOrEmpty(personalAccessToken.Value))
                 {
                     personalAccessToken = configurationStore.GetPersonalAccessToken();
                 }
@@ -56,7 +57,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 }
                 else
                 {
-                    var projects = adoApiClient.GetProjectList(urls, personalAccessToken, true);
+                    var projects = adoApiClient.GetProjectList(urls, personalAccessToken.Value, true);
                     if (!projects.Succeeded)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, projects.FailureReason);
@@ -80,14 +81,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
                 foreach (var projectUrl in projectUrls)
                 {
-                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken, true);
+                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken.Value, true);
                     if (!buildScopeTest.Succeeded)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeTest.FailureReason);
                         continue;
                     }
 
-                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken, true);
+                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken.Value, true);
                     if (!workItemScopeTest.Succeeded)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeTest.FailureReason);
