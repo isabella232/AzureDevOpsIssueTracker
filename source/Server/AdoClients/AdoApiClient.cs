@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Resources.IssueTrackers;
@@ -26,12 +27,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
         private readonly HtmlConvert htmlConvert;
+        private readonly ILog log;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert)
+        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert, ILog log)
         {
             this.store = store;
             this.client = client;
             this.htmlConvert = htmlConvert;
+            this.log = log;
         }
 
         internal string? GetPersonalAccessToken(AdoUrl adoUrl)
@@ -39,10 +42,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             try
             {
                 var baseUrl = store.GetBaseUrl();
-                return baseUrl == null ? null : 
-                    new Uri(baseUrl?.TrimEnd('/'), UriKind.Absolute).IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute))
-                    ? store.GetPersonalAccessToken()?.Value
-                    : null;
+                if (baseUrl == null)
+                    return null;
+                var uri = new Uri(baseUrl?.TrimEnd('/'), UriKind.Absolute);
+                return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute)) ? store.GetPersonalAccessToken()?.Value : null;
             }
             catch
             {
@@ -148,24 +151,26 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 .ToArray());
         }
 
-        public string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)
+        string BuildWorkItemBrowserUrl(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
             return $"{adoProjectUrls.ProjectUrl}/_workitems?_a=edit&id={workItemId}";
         }
 
-        public ResultFromExtension<string?> GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
+        string? GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
         {
             var releaseNotePrefix = store.GetReleaseNotePrefix();
             if (string.IsNullOrWhiteSpace(releaseNotePrefix) || commentCount == 0)
             {
-                return ResultFromExtension<string?>.Success(null);
+                return null;
             }
 
             var comments = GetWorkItemComments(adoProjectUrls, workItemId);
             if (comments.WasFailure)
             {
-                return ResultFromExtension<string?>.Failed(comments.Errors);
+                // if we can't retrieve the comments then move on without 
+                log.WarnFormat("Error retrieving Azure DevOps comments for work item {0}. Error: {1}", workItemId, comments.ErrorString);
+                return null;
             }
 
             var releaseNoteRegex = new Regex("^" + Regex.Escape(releaseNotePrefix), RegexOptions.IgnoreCase);
@@ -175,25 +180,21 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var releaseNote = releaseNoteComment != null
                 ? releaseNoteRegex.Replace(releaseNoteComment, "").Trim()
                 : null;
-            return ResultFromExtension<string?>.Success(releaseNote);
+            return releaseNote;
         }
 
-        public ResultFromExtension<WorkItemLink> GetWorkItemLink(AdoProjectUrls adoProjectUrls, int workItemId)
+        ResultFromExtension<WorkItemLink> GetWorkItemLink(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             var workItem = GetWorkItem(adoProjectUrls, workItemId);
-            if (workItem.WasFailure)
-                return ResultFromExtension<WorkItemLink>.Failed(workItem.Errors);
-            var releaseNote = GetReleaseNote(adoProjectUrls, workItemId, workItem.Value.commentCount);
-            if (releaseNote.WasFailure)
-                return ResultFromExtension<WorkItemLink>.Failed(releaseNote.Errors);
+            var releaseNote = workItem.WasSuccessful ? GetReleaseNote(adoProjectUrls, workItemId, workItem.Value.commentCount) : null;
 
             var workItemLink = new WorkItemLink
             {
                 Id = workItemId.ToString(),
                 LinkUrl = BuildWorkItemBrowserUrl(adoProjectUrls, workItemId),
-                Description = !string.IsNullOrWhiteSpace(releaseNote.Value)
-                    ? releaseNote.Value
-                    : !string.IsNullOrWhiteSpace(workItem.Value.title)
+                Description = !string.IsNullOrWhiteSpace(releaseNote)
+                    ? releaseNote
+                    : workItem.WasSuccessful && !string.IsNullOrWhiteSpace(workItem.Value.title)
                         ? workItem.Value.title
                         : workItemId.ToString(),
                 Source = AzureDevOpsConfigurationStore.CommentParser
@@ -212,8 +213,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
                 .Select(w => GetWorkItemLink(adoBuildUrls, w.id))
                 .ToArray();
             var validWorkItemLinks = workItemLinks
+                .Where(w => w.WasSuccessful)
                 .Select(r => r.Value)
-                .Where(v => v != null)
                 .ToArray();
             return ResultFromExtension<WorkItemLink[]>.Success(validWorkItemLinks);
         }

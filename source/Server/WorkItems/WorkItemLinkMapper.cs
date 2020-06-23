@@ -1,5 +1,4 @@
 ﻿using System;
-using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.Extensions.WorkItems;
 using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -26,8 +25,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public ResultFromExtension<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
         {
             // For ADO, we should ignore anything that wasn't built by ADO because we get work items from the build
-            if (!IsEnabled
-                || buildInformation?.BuildEnvironment != "Azure DevOps"
+            if (!IsEnabled)
+                return ResultFromExtension<WorkItemLink[]>.ExtensionDisabled();
+            if (buildInformation?.BuildEnvironment != "Azure DevOps"
                 || string.IsNullOrWhiteSpace(buildInformation?.BuildUrl))
                 return ResultFromExtension<WorkItemLink[]>.Success(Array.Empty<WorkItemLink>());
 

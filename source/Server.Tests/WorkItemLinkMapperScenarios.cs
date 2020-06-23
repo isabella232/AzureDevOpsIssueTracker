@@ -21,14 +21,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         }
 
         [Test]
-        public void WhenDisabledReturnsNull()
+        public void WhenDisabledReturnsExtensionIsDisabled()
         {
             var links = CreateWorkItemLinkMapper(false).Map(new OctopusBuildInformation
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
             });
-            Assert.IsTrue(links.WasSuccessful);
-            Assert.IsNull(links.Value);
+            Assert.IsFalse(links.WasSuccessful);
+            Assert.IsTrue(links.ExtensionIsDisabled);
         }
     }
 }
