@@ -1,13 +1,10 @@
 ﻿using System;
 using NSubstitute;
 using NUnit.Framework;
-using Octopus.Server.Extensibility.Extensions;
 using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
-using Octopus.Server.Extensibility.HostServices.Model.IssueTrackers;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
-using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
@@ -30,7 +27,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             {
                 BuildUrl = "http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"
             });
-            Assert.IsTrue(links.Succeeded);
+            Assert.IsTrue(links.WasSuccessful);
             Assert.IsNull(links.Value);
         }
     }

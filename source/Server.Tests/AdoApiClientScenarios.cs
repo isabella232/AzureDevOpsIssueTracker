@@ -40,7 +40,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
-            Assert.IsTrue(workItemLinks.Succeeded);
+            Assert.IsTrue(workItemLinks.WasSuccessful);
             var workItemLink = workItemLinks.Value.Single();
             Assert.AreEqual("2", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=2", workItemLink.LinkUrl);
@@ -63,7 +63,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
-            Assert.IsTrue(workItemLinks.Succeeded);
+            Assert.IsTrue(workItemLinks.WasSuccessful);
             var workItemLink = workItemLinks.Value.Single();
             Assert.AreEqual("Azure DevOps", workItemLink.Source);
         }
@@ -86,7 +86,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=28"));
 
-            Assert.IsTrue(workItemLinks.Succeeded);
+            Assert.IsTrue(workItemLinks.WasSuccessful);
             var workItemLink = workItemLinks.Value.Single();
             Assert.AreEqual("4", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=4", workItemLink.LinkUrl);
@@ -115,8 +115,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
 
-            Assert.IsFalse(workItemLinks.Succeeded);
-            Assert.AreEqual("Error while fetching work item comments from Azure DevOps: 500 (InternalServerError).", workItemLinks.FailureReason);
+            Assert.IsFalse(workItemLinks.WasSuccessful);
+            Assert.AreEqual("Error while fetching work item comments from Azure DevOps: 500 (InternalServerError).", workItemLinks.ErrorString);
             Assert.AreEqual(2, workItemLinks.Value.Length);
             Assert.AreEqual("5", workItemLinks.Value[0].Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=5", workItemLinks.Value[0].LinkUrl);
@@ -162,7 +162,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=7"));
 
-            Assert.IsTrue(workItemLinks.Succeeded);
+            Assert.IsTrue(workItemLinks.WasSuccessful);
             Assert.IsEmpty(workItemLinks.Value);
         }
 
@@ -181,7 +181,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=8"));
 
-            Assert.IsTrue(workItemLinks.Succeeded);
+            Assert.IsTrue(workItemLinks.WasSuccessful);
             var workItemLink = workItemLinks.Value.Single();
             Assert.AreEqual("999", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=999", workItemLink.LinkUrl);
