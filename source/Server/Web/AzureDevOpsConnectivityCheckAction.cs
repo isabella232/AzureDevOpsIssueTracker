@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Octopus.Data;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Web.Api;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
@@ -57,13 +58,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 }
                 else
                 {
-                    var projects = adoApiClient.GetProjectList(urls, personalAccessToken?.Value, true);
-                    if (projects.WasFailure)
+                    var projectsResult = adoApiClient.GetProjectList(urls, personalAccessToken?.Value, true);
+                    if (projectsResult is FailureResult failure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, projects.ErrorString);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, failure.ErrorString);
                         context.Response.AsOctopusJson(connectivityCheckResponse);
                         return;
                     }
+
+                    var projects = (ISuccessResult<string[]>) projectsResult;
 
                     if (!projects.Value.Any())
                     {
@@ -81,16 +84,16 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 foreach (var projectUrl in projectUrls)
                 {
                     var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken?.Value, true);
-                    if (buildScopeTest.WasFailure)
+                    if (buildScopeTest is FailureResult buildScopeFailure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeTest.ErrorString);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeFailure.ErrorString);
                         continue;
                     }
 
                     var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken?.Value, true);
-                    if (workItemScopeTest.WasFailure)
+                    if (workItemScopeTest is FailureResult workItemScopeFailure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeTest.ErrorString);
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeFailure.ErrorString);
                         continue;
                     }
 

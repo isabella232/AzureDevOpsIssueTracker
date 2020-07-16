@@ -22,7 +22,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
         public string CommentParser => AzureDevOpsConfigurationStore.CommentParser;
         public bool IsEnabled => store.GetIsEnabled();
 
-        public ResultFromExtension<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
+        public IResultFromExtension<WorkItemLink[]> Map(OctopusBuildInformation buildInformation)
         {
             // For ADO, we should ignore anything that wasn't built by ADO because we get work items from the build
             if (!IsEnabled)

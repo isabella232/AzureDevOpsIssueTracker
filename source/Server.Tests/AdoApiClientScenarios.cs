@@ -3,11 +3,13 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
+using Octopus.Data;
 using Octopus.Data.Model;
 using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
+using Octopus.Server.Extensibility.Resources.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
@@ -47,14 +49,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            var workItemLink = workItemLinks.Value.Single();
+            var workItemLink = ((ISuccessResult<WorkItemLink[]>)workItemLinks).Value.Single();
             Assert.AreEqual("2", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=2", workItemLink.LinkUrl);
             Assert.AreEqual("README has no useful content", workItemLink.Description);
         }
 
-        
+
         [Test]
         public void SourceGetsSet()
         {
@@ -70,8 +71,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            var workItemLink = workItemLinks.Value.Single();
+            var workItemLink = ((ISuccessResult<WorkItemLink[]>)workItemLinks).Value.Single();
             Assert.AreEqual("Azure DevOps", workItemLink.Source);
         }
 
@@ -93,8 +93,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=28"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            var workItemLink = workItemLinks.Value.Single();
+            var workItemLink = ((ISuccessResult<WorkItemLink[]>)workItemLinks).Value.Single();
             Assert.AreEqual("4", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=4", workItemLink.LinkUrl);
             Assert.AreEqual("README riddle now has an answer!", workItemLink.Description);
@@ -122,14 +121,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=29"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            Assert.AreEqual(2, workItemLinks.Value.Length);
-            Assert.AreEqual("5", workItemLinks.Value[0].Id);
-            Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=5", workItemLinks.Value[0].LinkUrl);
-            Assert.AreEqual("The README riddle has no answer", workItemLinks.Value[0].Description);
-            Assert.AreEqual("6", workItemLinks.Value[1].Id);
-            Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=6", workItemLinks.Value[1].LinkUrl);
-            Assert.AreEqual("6", workItemLinks.Value[1].Description);
+            var successResult = ((ISuccessResult<WorkItemLink[]>)workItemLinks);
+            Assert.AreEqual(2, successResult.Value.Length);
+            Assert.AreEqual("5", successResult.Value[0].Id);
+            Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=5", successResult.Value[0].LinkUrl);
+            Assert.AreEqual("The README riddle has no answer", successResult.Value[0].Description);
+            Assert.AreEqual("6", successResult.Value[1].Id);
+            Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=6", successResult.Value[1].LinkUrl);
+            Assert.AreEqual("6", successResult.Value[1].Description);
             log.Received().WarnFormat(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>());
         }
 
@@ -169,8 +168,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=7"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            Assert.IsEmpty(workItemLinks.Value);
+            Assert.IsEmpty(((ISuccessResult<WorkItemLink[]>)workItemLinks).Value);
         }
 
         [Test]
@@ -188,8 +186,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var workItemLinks = new AdoApiClient(store, httpJsonClient, HtmlConvert, log).GetBuildWorkItemLinks(
                 AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=8"));
 
-            Assert.IsTrue(workItemLinks.WasSuccessful);
-            var workItemLink = workItemLinks.Value.Single();
+            var workItemLink = ((ISuccessResult<WorkItemLink[]>)workItemLinks).Value.Single();
             Assert.AreEqual("999", workItemLink.Id);
             Assert.AreEqual("http://redstoneblock/DefaultCollection/Deployable/_workitems?_a=edit&id=999", workItemLink.LinkUrl);
             Assert.AreEqual("999", workItemLink.Description);
