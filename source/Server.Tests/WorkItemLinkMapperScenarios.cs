@@ -17,7 +17,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             var config = Substitute.For<IAzureDevOpsConfigurationStore>();
             config.GetIsEnabled().Returns(enabled);
             var adoApiClient = Substitute.For<IAdoApiClient>();
-            adoApiClient.GetBuildWorkItemLinks(null).ReturnsForAnyArgs(ci => throw new InvalidOperationException());
+            adoApiClient.GetBuildWorkItemLinks(new AdoBuildUrls("http://redstoneblock", 24)).ReturnsForAnyArgs(ci => throw new InvalidOperationException());
             return new WorkItemLinkMapper(config, adoApiClient);
         }
 
