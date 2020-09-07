@@ -37,7 +37,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 // the configuration as we won't have the value of the PersonalAccessToken on client side, so we need to retrieve it
                 // from the database
                 var personalAccessToken = requestData.PersonalAccessToken.ToSensitiveString();
-                if (string.IsNullOrEmpty(personalAccessToken.Value))
+                if (string.IsNullOrEmpty(personalAccessToken?.Value))
                 {
                     personalAccessToken = configurationStore.GetPersonalAccessToken();
                 }
@@ -114,6 +114,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
         }
     }
 
+#nullable disable
     class ConnectionCheckData
     {
         public string BaseUrl { get; set; }
