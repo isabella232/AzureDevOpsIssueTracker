@@ -25,17 +25,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     class AdoApiClient : IAdoApiClient
     {
+        private readonly ISystemLog log;
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
         private readonly HtmlConvert htmlConvert;
-        private readonly ILog log;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert, ILog log)
+        public AdoApiClient(ISystemLog log, IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert)
         {
+            this.log = log;
             this.store = store;
             this.client = client;
             this.htmlConvert = htmlConvert;
-            this.log = log;
         }
 
         internal string? GetPersonalAccessToken(AdoUrl adoUrl)

@@ -8,11 +8,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
     {
-        readonly ILog log;
+        readonly ISystemLog log;
         readonly Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration;
 
         public AzureDevOpsConfigureCommands(
-            ILog log,
+            ISystemLog log,
             Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration)
         {
             this.log = log;

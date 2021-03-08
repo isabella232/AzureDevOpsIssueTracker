@@ -15,9 +15,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
                 .Split(' ')
                 .ToDictionary(n => n, n => true);
 
-        private readonly ILog log;
+        private readonly ISystemLog log;
 
-        public HtmlConvert(ILog log)
+        public HtmlConvert(ISystemLog log)
         {
             this.log = log;
         }
