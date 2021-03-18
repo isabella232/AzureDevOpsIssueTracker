@@ -25,17 +25,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     class AdoApiClient : IAdoApiClient
     {
+        private readonly ISystemLog systemLog;
         private readonly IAzureDevOpsConfigurationStore store;
         private readonly IHttpJsonClient client;
         private readonly HtmlConvert htmlConvert;
-        private readonly ILog log;
 
-        public AdoApiClient(IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert, ILog log)
+        public AdoApiClient(ISystemLog systemLog, IAzureDevOpsConfigurationStore store, IHttpJsonClient client, HtmlConvert htmlConvert)
         {
+            this.systemLog = systemLog;
             this.store = store;
             this.client = client;
             this.htmlConvert = htmlConvert;
-            this.log = log;
         }
 
         internal string? GetPersonalAccessToken(AdoUrl adoUrl)
@@ -170,7 +170,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             if (comments is FailureResult failure)
             {
                 // if we can't retrieve the comments then move on without
-                log.WarnFormat("Error retrieving Azure DevOps comments for work item {0}. Error: {1}", workItemId, failure.ErrorString);
+                systemLog.WarnFormat("Error retrieving Azure DevOps comments for work item {0}. Error: {1}", workItemId, failure.ErrorString);
                 return null;
             }
 

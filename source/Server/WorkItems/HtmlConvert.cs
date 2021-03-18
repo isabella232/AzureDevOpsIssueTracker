@@ -15,11 +15,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
                 .Split(' ')
                 .ToDictionary(n => n, n => true);
 
-        private readonly ILog log;
+        private readonly ISystemLog systemLog;
 
-        public HtmlConvert(ILog log)
+        public HtmlConvert(ISystemLog systemLog)
         {
-            this.log = log;
+            this.systemLog = systemLog;
         }
 
         public string ToPlainText(string html)
@@ -35,7 +35,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             }
             catch (Exception ex)
             {
-                log.Info(ex, "Unable to convert Azure DevOps work item comment HTML to plain text.");
+                systemLog.Info(ex, "Unable to convert Azure DevOps work item comment HTML to plain text.");
                 return html;
             }
         }

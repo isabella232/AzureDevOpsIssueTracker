@@ -8,14 +8,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     class AzureDevOpsConfigureCommands : IContributeToConfigureCommand
     {
-        readonly ILog log;
+        readonly ISystemLog systemLog;
         readonly Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration;
 
         public AzureDevOpsConfigureCommands(
-            ILog log,
+            ISystemLog systemLog,
             Lazy<IAzureDevOpsConfigurationStore> azureDevOpsConfiguration)
         {
-            this.log = log;
+            this.systemLog = systemLog;
             this.azureDevOpsConfiguration = azureDevOpsConfiguration;
         }
 
@@ -26,19 +26,19 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                 {
                     var isEnabled = bool.Parse(v);
                     azureDevOpsConfiguration.Value.SetIsEnabled(isEnabled);
-                    log.Info($"Azure DevOps Issue Tracker integration IsEnabled set to: {isEnabled}");
+                    systemLog.Info($"Azure DevOps Issue Tracker integration IsEnabled set to: {isEnabled}");
                 });
             yield return new ConfigureCommandOption("AzureDevOpsBaseUrl=", AzureDevOpsConfigurationResource.BaseUrlDescription,
                 v =>
                 {
                     azureDevOpsConfiguration.Value.SetBaseUrl(v);
-                    log.Info($"Azure DevOps Issue Tracker integration base Url set to: {v}");
+                    systemLog.Info($"Azure DevOps Issue Tracker integration base Url set to: {v}");
                 });
             yield return new ConfigureCommandOption("AzureDevOpsPersonalAccessToken=", AzureDevOpsConfigurationResource.PersonalAccessTokenDescription,
                 v =>
                 {
                     azureDevOpsConfiguration.Value.SetPersonalAccessToken(v.ToSensitiveString());
-                    log.Info($"Azure DevOps Issue Tracker integration personal access token set to: {v}");
+                    systemLog.Info($"Azure DevOps Issue Tracker integration personal access token set to: {v}");
                 });
         }
     }

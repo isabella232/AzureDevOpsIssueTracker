@@ -6,12 +6,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     class DatabaseInitializer : ExecuteWhenDatabaseInitializes
     {
-        readonly ILog log;
+        readonly ISystemLog systemLog;
         readonly IConfigurationStore configurationStore;
 
-        public DatabaseInitializer(ILog log, IConfigurationStore configurationStore)
+        public DatabaseInitializer(ISystemLog systemLog, IConfigurationStore configurationStore)
         {
-            this.log = log;
+            this.systemLog = systemLog;
             this.configurationStore = configurationStore;
         }
 
@@ -21,7 +21,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
             if (doc != null)
                 return;
 
-            log.Info("Initializing Azure DevOps integration settings");
+            systemLog.Info("Initializing Azure DevOps integration settings");
             doc = new AzureDevOpsConfiguration();
             configurationStore.Create(doc);
         }
