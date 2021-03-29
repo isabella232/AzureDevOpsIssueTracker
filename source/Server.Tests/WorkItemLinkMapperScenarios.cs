@@ -1,11 +1,11 @@
 ﻿using System;
 using NSubstitute;
 using NUnit.Framework;
-using Octopus.Server.Extensibility.HostServices.Model.BuildInformation;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
 using Octopus.Server.Extensibility.Results;
+using Octopus.Server.MessageContracts.BuildInformation;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
