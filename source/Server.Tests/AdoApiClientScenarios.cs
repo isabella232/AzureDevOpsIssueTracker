@@ -9,7 +9,7 @@ using Octopus.Diagnostics;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration;
 using Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems;
-using Octopus.Server.Extensibility.Resources.IssueTrackers;
+using Octopus.Server.MessageContracts.Features.IssueTrackers;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 {
