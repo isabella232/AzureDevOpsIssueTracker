@@ -33,5 +33,6 @@ jobs:
 
       - name: Push package 🐙
         id: push
+        if: !startsWith(github.ref, "dependabot")
         shell: bash
         run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub"
