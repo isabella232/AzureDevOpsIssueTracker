@@ -35,7 +35,7 @@ jobs:
         id: push-github
         if: startsWith(github.ref, 'dependabot') == false
         shell: bash
-        run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub"
+        run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub" --skip-duplicate
 
       - name: Push package to Feedz.io 🐙
         id: push-feedz
