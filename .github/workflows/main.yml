@@ -35,13 +35,13 @@ jobs:
         id: push-github
         if: startsWith(github.ref, 'dependabot') == false
         shell: bash
-        run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub" --skip-duplicate
+        run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub"
 
-      - name: Push package to Feedz.io 🐙
-        id: push-feedz
+      - name: Push package to feed 🐙
+        id: push-feed
         if: startsWith(github.ref, 'dependabot') == false
         shell: bash
         env:
-          FEEDZ_API_KEY: ${{ secrets.FEEDZ_API_KEY }}
-          FEEDZ_SOURCE: https://f.feedz.io/octopus-deploy/dependencies/nuget/index.json
-        run: dotnet nuget push artifacts/**/*.nupkg --api-key "$FEEDZ_API_KEY" --source "$FEEDZ_SOURCE"
+          FEED_API_KEY: ${{ secrets.FEED_API_KEY }}
+          FEED_SOURCE: ${{ secrets.FEED_SOURCE }}
+        run: dotnet nuget push artifacts/**/*.nupkg --api-key "$FEED_API_KEY" --source "$FEED_SOURCE"
