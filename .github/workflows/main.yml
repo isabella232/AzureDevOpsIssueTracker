@@ -21,7 +21,7 @@ jobs:
         with:
           dotnet-version: 5.0.x
 
-      - name: Configure package source 🐙
+      - name: Configure GitHub package source 🐙
         id: package-source
         shell: bash
         run: dotnet nuget update source GitHub --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
@@ -31,8 +31,17 @@ jobs:
         shell: bash
         run: ./build.sh --verbosity verbose
 
-      - name: Push package 🐙
-        id: push
+      - name: Push package to GitHub 🐙
+        id: push-github
         if: startsWith(github.ref, 'dependabot') == false
         shell: bash
         run: dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "GitHub"
+
+      - name: Push package to feed 🐙
+        id: push-feed
+        if: startsWith(github.ref, 'dependabot') == false
+        shell: bash
+        env:
+          FEED_API_KEY: ${{ secrets.FEED_API_KEY }}
+          FEED_SOURCE: ${{ secrets.FEED_SOURCE }}
+        run: dotnet nuget push artifacts/**/*.nupkg --api-key "$FEED_API_KEY" --source "$FEED_SOURCE"
