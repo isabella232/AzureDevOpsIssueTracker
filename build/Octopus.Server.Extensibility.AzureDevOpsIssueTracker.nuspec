@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" xmlns:octopus="http://octopus.org">
   <metadata>
-    <id>Octopus.Server.Extensibility.AzureDevOpsIssueTracker</id>
+    <id>Octopus.Server.Extensibility.IssueTracker.AzureDevOps</id>
     <title>Octopus Server Extensibility Issue Tracker - AzureDevOps</title>
     <version>$version$</version>
     <authors>Octopus Deploy</authors>
