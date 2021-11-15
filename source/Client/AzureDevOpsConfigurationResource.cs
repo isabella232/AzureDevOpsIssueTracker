@@ -7,6 +7,11 @@ namespace Octopus.Client.Extensibility.IssueTracker.AzureDevOps
 {
     public class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
+        public AzureDevOpsConfigurationResource()
+        {
+            Id = "issuetracker-azuredevops-v2";
+        }
+        
         [Writeable]
         public AzureDevOpsConnectionResource[] Connections { get; set; } = new AzureDevOpsConnectionResource[0];
     }
