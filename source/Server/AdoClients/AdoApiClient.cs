@@ -177,7 +177,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
                 var uri = new Uri(connection.BaseUrl.TrimEnd('/'), UriKind.Absolute);
 
-                return uri.IsBaseOf(new Uri(adoProjectUrls.ProjectUrl, UriKind.Absolute));
+                return adoProjectUrls.ProjectUrl != null && uri.IsBaseOf(new Uri(adoProjectUrls.ProjectUrl, UriKind.Absolute));
             })?.ReleaseNoteOptions.ReleaseNotePrefix;
             if (string.IsNullOrWhiteSpace(releaseNotePrefix) || commentCount == 0)
             {

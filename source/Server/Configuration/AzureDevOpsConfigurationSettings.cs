@@ -30,7 +30,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         {
             builder.Map<AzureDevOpsConfigurationResource, AzureDevOpsConfiguration>();
             builder.Map<ReleaseNoteOptionsResource, ReleaseNoteOptions>();
-            builder.Map<AzureDevOpsConnectionResource, ReleaseNoteOptions>();
+            builder.Map<AzureDevOpsConnectionResource, AzureDevOpsConnection>();
             
         }
     }

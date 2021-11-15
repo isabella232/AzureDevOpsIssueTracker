@@ -13,6 +13,8 @@
     <PackageIconUrl>https://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

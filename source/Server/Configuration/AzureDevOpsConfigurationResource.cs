@@ -16,8 +16,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
     class AzureDevOpsConnectionResource
     {
-        public const string BaseUrlDisplayName = "Azure DevOps Base Url";
-        public const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
+        const string BaseUrlDisplayName = "Azure DevOps Base Url";
+        const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
         
         [DisplayName(BaseUrlDisplayName)]
         [Description(BaseUrlDescription)]
