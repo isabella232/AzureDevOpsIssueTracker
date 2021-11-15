@@ -39,7 +39,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 var personalAccessToken = requestData.PersonalAccessToken.ToSensitiveString();
                 if (string.IsNullOrEmpty(personalAccessToken?.Value))
                 {
-                    personalAccessToken = configurationStore.GetPersonalAccessToken();
+                    personalAccessToken = configurationStore.GetConnections().FirstOrDefault(connection => connection.BaseUrl == baseUrl)?.PersonalAccessToken;
                 }
 
                 if (string.IsNullOrEmpty(baseUrl))

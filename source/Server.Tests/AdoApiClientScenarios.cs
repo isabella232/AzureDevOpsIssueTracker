@@ -22,9 +22,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
         {
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
-            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
-            store.GetPersonalAccessToken().Returns("rumor".ToSensitiveString());
-            store.GetReleaseNotePrefix().Returns("= Changelog =");
+            store.GetConnections().Returns(new[]
+            {
+                new AzureDevOpsConnection
+                {
+                    BaseUrl = "http://redstoneblock/DefaultCollection/", PersonalAccessToken = "rumor".ToSensitiveString(),
+                    ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = "= Changelog =" }
+                }
+            });
+            
             return store;
         }
 

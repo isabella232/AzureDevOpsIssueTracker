@@ -38,15 +38,23 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             this.htmlConvert = htmlConvert;
         }
 
-        internal string? GetPersonalAccessToken(AdoUrl adoUrl)
+        string? GetPersonalAccessToken(AdoUrl adoUrl)
         {
             try
             {
-                var baseUrl = store.GetBaseUrl();
-                if (baseUrl == null)
-                    return null;
-                var uri = new Uri(baseUrl.TrimEnd('/'), UriKind.Absolute);
-                return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute)) ? store.GetPersonalAccessToken()?.Value : null;
+                var azureDevOpsConnection = store.GetConnections().FirstOrDefault(connection =>
+                {
+                    if (connection.BaseUrl == null)
+                    {
+                        return false;
+                    }
+
+                    var uri = new Uri(connection.BaseUrl.TrimEnd('/'), UriKind.Absolute);
+
+                    return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute));
+                });
+                
+                return azureDevOpsConnection?.PersonalAccessToken?.Value;
             }
             catch
             {
@@ -160,7 +168,17 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         string? GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
         {
-            var releaseNotePrefix = store.GetReleaseNotePrefix();
+            var releaseNotePrefix = store.GetConnections().FirstOrDefault(connection =>
+            {
+                if (connection.BaseUrl == null)
+                {
+                    return false;
+                }
+
+                var uri = new Uri(connection.BaseUrl.TrimEnd('/'), UriKind.Absolute);
+
+                return uri.IsBaseOf(new Uri(adoProjectUrls.ProjectUrl, UriKind.Absolute));
+            })?.ReleaseNoteOptions.ReleaseNotePrefix;
             if (string.IsNullOrWhiteSpace(releaseNotePrefix) || commentCount == 0)
             {
                 return null;
