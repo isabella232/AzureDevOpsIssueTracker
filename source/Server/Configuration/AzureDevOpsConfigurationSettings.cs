@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.HostServices.Mapping;
+using Octopus.Server.MessageContracts;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
@@ -28,10 +30,22 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override void BuildMappings(IResourceMappingsBuilder builder)
         {
-            builder.Map<AzureDevOpsConfigurationResource, AzureDevOpsConfiguration>();
-            builder.Map<ReleaseNoteOptionsResource, ReleaseNoteOptions>();
-            builder.Map<AzureDevOpsConnectionResource, AzureDevOpsConnection>();
-            
+            builder.Map<AzureDevOpsConfigurationResource, AzureDevOpsConfiguration>()
+                .DoNotMap(model => model.Connections)
+                .EnrichResource((model, resource) => resource.Connections = model.Connections.Select(connection => new AzureDevOpsConnectionResource
+                {
+                    BaseUrl = connection.BaseUrl,
+                    PersonalAccessToken = new SensitiveValue { HasValue = connection.PersonalAccessToken?.Value != null },
+                    ReleaseNoteOptions = new ReleaseNoteOptionsResource { ReleaseNotePrefix = connection.ReleaseNoteOptions.ReleaseNotePrefix }
+                }).ToArray())
+                .EnrichModel((model, resource) => model.Connections = resource.Connections.Select(connectionResource => new AzureDevOpsConnection
+                {
+                    BaseUrl = connectionResource.BaseUrl,
+                    PersonalAccessToken = connectionResource.PersonalAccessToken is { HasValue: true }
+                        ? connectionResource.PersonalAccessToken.NewValue.ToSensitiveString()
+                        : null,
+                    ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = connectionResource.ReleaseNoteOptions.ReleaseNotePrefix }
+                }).ToArray());
         }
     }
 }
