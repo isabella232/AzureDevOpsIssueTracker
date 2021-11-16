@@ -53,7 +53,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                     
                     foreach (var connectionResource in resource.Connections)
                     {
-                        var item = copyConnection.Find(connection => connection.Id == connectionResource.Id);
+                        var item = connectionResource.Id != null 
+                            ? copyConnection.Find(connection => connection.Id == connectionResource.Id) 
+                            : null;
                         
                         if (item != null)
                         {
