@@ -15,6 +15,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
     class AzureDevOpsConnection
     {
+        public string Id { get; set; }
+        
         public string? BaseUrl { get; set; }
 
         public SensitiveString? PersonalAccessToken { get; set; }

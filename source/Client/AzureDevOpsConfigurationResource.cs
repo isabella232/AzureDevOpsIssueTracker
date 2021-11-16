@@ -19,6 +19,8 @@ namespace Octopus.Client.Extensibility.IssueTracker.AzureDevOps
 
     public class AzureDevOpsConnectionResource
     {
+        public string? Id { get; set; }
+
         [Required]
         [Writeable]
         public string? BaseUrl { get; set; }

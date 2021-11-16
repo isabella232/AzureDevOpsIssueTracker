@@ -19,6 +19,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     {
         const string BaseUrlDisplayName = "Azure DevOps Base Url";
         const string BaseUrlDescription = "Set the base url for the Azure DevOps organization or collection or project.";
+
+        public string? Id { get; set; }
         
         [DisplayName(BaseUrlDisplayName)]
         [Description(BaseUrlDescription)]
