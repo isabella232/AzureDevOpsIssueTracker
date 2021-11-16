@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -22,9 +23,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
         {
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
-            store.GetConnections().Returns(new[]
+            store.GetConnections().Returns(new List<AzureDevOpsConnection>
             {
-                new AzureDevOpsConnection
+                new()
                 {
                     BaseUrl = "http://redstoneblock/DefaultCollection/", PersonalAccessToken = "rumor".ToSensitiveString(),
                     ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = "= Changelog =" }

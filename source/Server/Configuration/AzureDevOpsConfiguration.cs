@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
@@ -10,7 +10,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         {
         }
 
-        public AzureDevOpsConnection[] Connections { get; set; } = Array.Empty<AzureDevOpsConnection>();
+        public List<AzureDevOpsConnection> Connections { get; set; } = new();
     }
 
     class AzureDevOpsConnection

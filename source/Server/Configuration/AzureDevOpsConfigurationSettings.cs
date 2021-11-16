@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Octopus.Data.Model;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.Extensibility.HostServices.Mapping;
-using Octopus.Server.MessageContracts;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {

@@ -1,4 +1,5 @@
-﻿using Octopus.Data.Storage.Configuration;
+﻿using System.Collections.Generic;
+using Octopus.Data.Storage.Configuration;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
@@ -15,12 +16,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override string Id => SingletonId;
 
-        public void SetConnections(AzureDevOpsConnection[] connections)
+        public void SetConnections(List<AzureDevOpsConnection> connections)
         {
             SetProperty(doc => doc.Connections = connections);
         }
 
-        public AzureDevOpsConnection[] GetConnections()
+        public List<AzureDevOpsConnection> GetConnections()
         {
             return GetProperty(doc => doc.Connections);
         }
