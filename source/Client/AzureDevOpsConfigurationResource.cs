@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Octopus.Client.Extensibility.Attributes;
 using Octopus.Client.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Client.Model;
@@ -10,10 +11,10 @@ namespace Octopus.Client.Extensibility.IssueTracker.AzureDevOps
         public AzureDevOpsConfigurationResource()
         {
             Id = "issuetracker-azuredevops-v2";
+            Connections = new List<AzureDevOpsConnectionResource>();
         }
         
-        [Writeable]
-        public AzureDevOpsConnectionResource[] Connections { get; set; } = new AzureDevOpsConnectionResource[0];
+        public IList<AzureDevOpsConnectionResource> Connections { get; }
     }
 
     public class AzureDevOpsConnectionResource

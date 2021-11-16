@@ -1,6 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 using Octopus.Server.MessageContracts;
 using Octopus.Server.MessageContracts.Attributes;
@@ -10,8 +11,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     [Description("Configure the Azure DevOps Issue Tracker. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
     class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
-        [Writeable]
-        public AzureDevOpsConnectionResource[] Connections { get; set; } = Array.Empty<AzureDevOpsConnectionResource>();
+        [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
+        public List<AzureDevOpsConnectionResource> Connections { get; } = new();
     }
 
     class AzureDevOpsConnectionResource
@@ -25,7 +26,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [Writeable]
         public string? BaseUrl { get; set; }
 
-        public const string PersonalAccessTokenDescription =
+        const string PersonalAccessTokenDescription =
             "A Personal Access Token (PAT) authorized to read scopes 'Build' and 'Work items', added under User Settings.";
 
         [DisplayName("Personal Access Token")]
