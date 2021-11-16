@@ -59,8 +59,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
                         
                         if (item != null)
                         {
-                            item.Id = connectionResource.Id;
-                            if (connectionResource.PersonalAccessToken is { HasValue: true, NewValue: { } })
+                            if (connectionResource.PersonalAccessToken != null && connectionResource.PersonalAccessToken.HasValue && connectionResource.PersonalAccessToken.NewValue != null)
                             {
                                 item.PersonalAccessToken = connectionResource.PersonalAccessToken.NewValue.ToSensitiveString();
                             }
