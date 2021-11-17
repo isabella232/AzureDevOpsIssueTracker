@@ -15,7 +15,7 @@
     <license type="expression">Apache-2.0</license>
     <projectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</projectUrl>
     <repository type="git" url="https://github.com/OctopusDeploy/AzureDevOpsIssueTracker" />
-    <icon>images\icon.png</icon>
+    <icon>images/icon.png</icon>
     <tags>automation deployment</tags>
     <dependencies>
       <dependency id="HtmlAgilityPack" version="1.11.4" />
