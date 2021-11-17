@@ -16,11 +16,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override string Id => SingletonId;
 
-        public void SetConnections(List<AzureDevOpsConnection> connections)
-        {
-            SetProperty(doc => doc.Connections = connections);
-        }
-
         public List<AzureDevOpsConnection> GetConnections()
         {
             return GetProperty(doc => doc.Connections);

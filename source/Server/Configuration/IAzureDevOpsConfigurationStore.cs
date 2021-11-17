@@ -5,7 +5,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
     interface IAzureDevOpsConfigurationStore : IExtensionConfigurationStore<AzureDevOpsConfiguration>
     {
-        void SetConnections(List<AzureDevOpsConnection> connections);
         List<AzureDevOpsConnection> GetConnections();
     }
 }

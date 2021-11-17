@@ -71,7 +71,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             var (status, jObject) = client.Get(workItemsUrl, personalAccessToken ?? GetPersonalAccessToken(adoBuildUrls));
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
-                return ResultFromExtension<(int id, string url)[]>.Success(new (int, string)[0]);
+                return ResultFromExtension<(int id, string url)[]>.Success(Array.Empty<(int, string)>());
             }
 
             if (!status.IsSuccessStatusCode())
@@ -122,7 +122,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         }
 
         /// <returns>Up to 200 comments on the specified work item.</returns>
-        public IResultFromExtension<string[]> GetWorkItemComments(AdoProjectUrls adoProjectUrls, int workItemId)
+        IResultFromExtension<string[]> GetWorkItemComments(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}/comments?api-version=4.1-preview.2",
@@ -130,7 +130,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
-                return ResultFromExtension<string[]>.Success(new string[0]);
+                return ResultFromExtension<string[]>.Success(Array.Empty<string>());
             }
 
             if (!status.IsSuccessStatusCode())
