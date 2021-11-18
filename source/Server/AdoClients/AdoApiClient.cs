@@ -20,7 +20,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             bool testing = false);
 
         IResultFromExtension<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
-        IResultFromExtension<string[]> GetProjectList(AdoUrl adoUrl, string? personalAccessToken = null, bool testing = false);
+        IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null, bool testing = false);
     }
 
     class AdoApiClient : IAdoApiClient
@@ -38,21 +38,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             this.htmlConvert = htmlConvert;
         }
 
-        string? GetPersonalAccessToken(AdoUrl adoUrl)
+        string? GetPersonalAccessToken(AdoProjectUrls adoUrl)
         {
             try
             {
-                var azureDevOpsConnection = store.GetConnections().FirstOrDefault(connection =>
-                {
-                    if (connection.BaseUrl == null)
-                    {
-                        return false;
-                    }
-
-                    var uri = new Uri(connection.BaseUrl.TrimEnd('/'), UriKind.Absolute);
-
-                    return uri.IsBaseOf(new Uri(adoUrl.OrganizationUrl, UriKind.Absolute));
-                });
+                var azureDevOpsConnection = store.GetMostQualifiedConnection(adoUrl);
                 
                 return azureDevOpsConnection?.PersonalAccessToken?.Value;
             }
@@ -168,17 +158,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
         string? GetReleaseNote(AdoProjectUrls adoProjectUrls, int workItemId, int? commentCount = null)
         {
-            var releaseNotePrefix = store.GetConnections().FirstOrDefault(connection =>
-            {
-                if (connection.BaseUrl == null)
-                {
-                    return false;
-                }
-
-                var uri = new Uri(connection.BaseUrl.TrimEnd('/'), UriKind.Absolute);
-
-                return adoProjectUrls.ProjectUrl != null && uri.IsBaseOf(new Uri(adoProjectUrls.ProjectUrl, UriKind.Absolute));
-            })?.ReleaseNoteOptions.ReleaseNotePrefix;
+            var releaseNotePrefix = store.GetMostQualifiedConnection(adoProjectUrls)?.ReleaseNoteOptions.ReleaseNotePrefix;
             if (string.IsNullOrWhiteSpace(releaseNotePrefix) || commentCount == 0)
             {
                 return null;
@@ -238,7 +218,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return ResultFromExtension<WorkItemLink[]>.Success(validWorkItemLinks);
         }
 
-        public IResultFromExtension<string[]> GetProjectList(AdoUrl adoUrl, string? personalAccessToken = null, bool testing = false)
+        public IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null, bool testing = false)
         {
             var (status, jObject) = client.Get($"{adoUrl.OrganizationUrl}/_apis/projects?api-version=4.1",
                 personalAccessToken ?? GetPersonalAccessToken(adoUrl));

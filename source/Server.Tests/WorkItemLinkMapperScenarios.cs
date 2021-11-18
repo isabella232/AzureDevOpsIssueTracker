@@ -48,7 +48,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         }
         
         [Test]
-        public void WhenItFindsWorkItems()
+        public void WhenItFindsWorkItemsWithComments()
         {
             var systemLog = Substitute.For<ISystemLog>();
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
@@ -57,9 +57,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 new HtmlConvert(systemLog));
 
             const string? baseUrl1 = "https://ado";
-            const string? baseUrl2 = "https://anotherado";
             const string password1 = "password1";
-            const string password2 = "password2";
             const int buildId = 16;
             const int workItemOneId = 24;
             const int workItemTwoId = 25;
@@ -75,8 +73,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 },
                 new()
                 {
-                    BaseUrl = baseUrl2, 
-                    PersonalAccessToken = password2.ToSensitiveString()
+                    BaseUrl = "https://anotherado", 
+                    PersonalAccessToken = "password2".ToSensitiveString()
                 }
             });
 
@@ -152,6 +150,130 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             {
                 BuildEnvironment = "Azure DevOps",
                 BuildUrl = $"{baseUrl1}/{projectName}/_build/results?buildId={buildId}"
+            });
+
+            var workItemLinks = result.Value;
+            Assert.AreEqual(2, workItemLinks.Length);
+            Assert.AreEqual("This one comment from a comment with th special prefix", workItemLinks[0].Description);
+            Assert.AreEqual("This is the work item two title", workItemLinks[1].Description);
+        }
+
+        const string CommonOrg = "https://myorg";
+        
+        [Test]
+        [TestCase(CommonOrg, "password1", "projectOne")]
+        [TestCase(CommonOrg, "passwordTwo", "projectTwo")]
+        [TestCase("https://adifferentorg", "anotherorg", "projectTwo")]
+        public void FindsTheMostQualifiedConnection(string baseUrl, string password, string projectName)
+        {
+            var systemLog = Substitute.For<ISystemLog>();
+            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
+            var jsonClient = Substitute.For<IHttpJsonClient>();
+            var client = new AdoApiClient(systemLog, store, jsonClient,
+                new HtmlConvert(systemLog));
+
+            var baseUrlWithProject = $"{baseUrl}/{projectName}";
+            const int buildId = 16;
+            const int workItemOneId = 24;
+            const int workItemTwoId = 25;
+            
+            store.GetConnections().Returns(new List<AzureDevOpsConnection>
+            {
+                new()
+                {
+                    BaseUrl = $"{CommonOrg}/nottobeused", 
+                    PersonalAccessToken = "something secret".ToSensitiveString()
+                },
+                new()
+                {
+                    BaseUrl = baseUrlWithProject, 
+                    PersonalAccessToken = password.ToSensitiveString(),
+                    ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = "My note:" }
+                },
+                new()
+                {
+                    BaseUrl = $"{CommonOrg}/nottobeusedagain", 
+                    PersonalAccessToken = "something secret".ToSensitiveString()
+                },
+                new()
+                {
+                    BaseUrl = CommonOrg, 
+                    PersonalAccessToken = "something secret".ToSensitiveString()
+                }
+            });
+
+            jsonClient.Get($"{baseUrlWithProject}/_apis/build/builds/{buildId}/workitems?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse($@"
+{{
+    ""value"": [
+        {{
+            ""id"": ""{workItemOneId}"",
+            ""url"": ""{baseUrlWithProject}/_apis/wit/workItems/{workItemOneId}""
+        }},
+        {{
+            ""id"": ""{workItemTwoId}"",
+            ""url"": ""{baseUrlWithProject}/_apis/wit/workItems/{workItemTwoId}""
+        }}
+    ]
+}}
+")));
+
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemOneId}?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""fields"": {
+        ""System.CommentCount"": 3,
+        ""System.Title"": ""This is the work item one title""
+    }
+}
+")));
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemOneId}/comments?api-version=4.1-preview.2", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""totalCount"": 3,
+    ""fromRevisionCount"": 0,
+    ""count"": 3,
+    ""comments"": [
+        {
+            ""text"": ""<div>my first comment</div>""
+        },
+        {
+            ""text"": ""<div>My second comment</div>""
+        },
+        {
+            ""text"": ""<div>My note: This one comment from a comment with th special prefix </div>""
+        }
+    ]
+}
+")));
+            
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemTwoId}?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""fields"": {
+        ""System.CommentCount"": 1,
+        ""System.Title"": ""This is the work item two title""
+    }
+}
+")));
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemTwoId}/comments?api-version=4.1-preview.2", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""totalCount"": 1,
+    ""fromRevisionCount"": 0,
+    ""count"": 1,
+    ""comments"": [
+        {
+            ""text"": ""<div>Not a special comment</div>""
+        }
+    ]
+}
+")));
+            
+            ISuccessResult<WorkItemLink[]> result = (ISuccessResult<WorkItemLink[]>)CreateWorkItemLinkMapper(client, store).Map(new OctopusBuildInformation
+            {
+                BuildEnvironment = "Azure DevOps",
+                BuildUrl = $"{baseUrlWithProject}/_build/results?buildId={buildId}"
             });
 
             var workItemLinks = result.Value;

@@ -72,7 +72,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             BuildId = buildId;
         }
 
-        public int BuildId { get; set; }
+        public int BuildId { get; }
 
         public static AdoBuildUrls ParseBrowserUrl(string browserUrl)
         {
