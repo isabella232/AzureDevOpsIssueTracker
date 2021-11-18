@@ -117,7 +117,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             ""text"": ""<div>My second comment</div>""
         },
         {
-            ""text"": ""<div>My note: This one comment from a comment with th special prefix </div>""
+            ""text"": ""<div>My note: This is a comment with the special prefix </div>""
         }
     ]
 }
@@ -154,7 +154,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 
             var workItemLinks = result.Value;
             Assert.AreEqual(2, workItemLinks.Length);
-            Assert.AreEqual("This one comment from a comment with th special prefix", workItemLinks[0].Description);
+            Assert.AreEqual("This is a comment with the special prefix", workItemLinks[0].Description);
             Assert.AreEqual("This is the work item two title", workItemLinks[1].Description);
         }
 
@@ -198,7 +198,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
                 new()
                 {
                     BaseUrl = CommonOrg, 
-                    PersonalAccessToken = "something secret".ToSensitiveString()
+                    PersonalAccessToken = "password for org".ToSensitiveString()
                 }
             });
 
@@ -241,7 +241,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
             ""text"": ""<div>My second comment</div>""
         },
         {
-            ""text"": ""<div>My note: This one comment from a comment with th special prefix </div>""
+            ""text"": ""<div>My note: This is a comment with the special prefix </div>""
         }
     ]
 }
@@ -278,7 +278,125 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 
             var workItemLinks = result.Value;
             Assert.AreEqual(2, workItemLinks.Length);
-            Assert.AreEqual("This one comment from a comment with th special prefix", workItemLinks[0].Description);
+            Assert.AreEqual("This is a comment with the special prefix", workItemLinks[0].Description);
+            Assert.AreEqual("This is the work item two title", workItemLinks[1].Description);
+        }
+        
+        [Test]
+        public void FallBackToOrgConnection()
+        {
+            var systemLog = Substitute.For<ISystemLog>();
+            var store = Substitute.For<IAzureDevOpsConfigurationStore>();
+            var jsonClient = Substitute.For<IHttpJsonClient>();
+            var client = new AdoApiClient(systemLog, store, jsonClient,
+                new HtmlConvert(systemLog));
+
+            string baseUrl = CommonOrg;
+            string password = "password for org";
+            string projectName = "myproject";
+
+            var baseUrlWithProject = $"{baseUrl}/{projectName}";
+            const int buildId = 16;
+            const int workItemOneId = 24;
+            const int workItemTwoId = 25;
+
+            store.GetConnections().Returns(new List<AzureDevOpsConnection>
+            {
+                new()
+                {
+                    BaseUrl = $"{CommonOrg}/nottobeused", 
+                    PersonalAccessToken = "something secret".ToSensitiveString()
+                },
+                new()
+                {
+                    BaseUrl = $"{CommonOrg}/nottobeusedagain", 
+                    PersonalAccessToken = "something secret".ToSensitiveString()
+                },
+                new()
+                {
+                    BaseUrl = CommonOrg, 
+                    PersonalAccessToken = password.ToSensitiveString(),
+                    ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = "My note:" }
+                }
+            });
+
+            jsonClient.Get($"{baseUrlWithProject}/_apis/build/builds/{buildId}/workitems?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse($@"
+{{
+    ""value"": [
+        {{
+            ""id"": ""{workItemOneId}"",
+            ""url"": ""{baseUrlWithProject}/_apis/wit/workItems/{workItemOneId}""
+        }},
+        {{
+            ""id"": ""{workItemTwoId}"",
+            ""url"": ""{baseUrlWithProject}/_apis/wit/workItems/{workItemTwoId}""
+        }}
+    ]
+}}
+")));
+
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemOneId}?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""fields"": {
+        ""System.CommentCount"": 3,
+        ""System.Title"": ""This is the work item one title""
+    }
+}
+")));
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemOneId}/comments?api-version=4.1-preview.2", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""totalCount"": 3,
+    ""fromRevisionCount"": 0,
+    ""count"": 3,
+    ""comments"": [
+        {
+            ""text"": ""<div>my first comment</div>""
+        },
+        {
+            ""text"": ""<div>My second comment</div>""
+        },
+        {
+            ""text"": ""<div>My note: This is a comment with the special prefix </div>""
+        }
+    ]
+}
+")));
+            
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemTwoId}?api-version=4.1", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""fields"": {
+        ""System.CommentCount"": 1,
+        ""System.Title"": ""This is the work item two title""
+    }
+}
+")));
+            jsonClient.Get($"{baseUrlWithProject}/_apis/wit/workitems/{workItemTwoId}/comments?api-version=4.1-preview.2", password).Returns((HttpStatusCode.OK,
+                JObject.Parse(@"
+{
+    ""totalCount"": 1,
+    ""fromRevisionCount"": 0,
+    ""count"": 1,
+    ""comments"": [
+        {
+            ""text"": ""<div>Not a special comment</div>""
+        }
+    ]
+}
+")));
+            
+            ISuccessResult<WorkItemLink[]> result = (ISuccessResult<WorkItemLink[]>)CreateWorkItemLinkMapper(client, store).Map(new OctopusBuildInformation
+            {
+                BuildEnvironment = "Azure DevOps",
+                BuildUrl = $"{baseUrlWithProject}/_build/results?buildId={buildId}"
+            });
+
+            var workItemLinks = result.Value;
+            Assert.AreEqual(2, workItemLinks.Length);
+            Assert.AreEqual("This is a comment with the special prefix", workItemLinks[0].Description);
             Assert.AreEqual("This is the work item two title", workItemLinks[1].Description);
         }
     }
