@@ -12,6 +12,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
         [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
+        [Description("Connect your Octopus instance to one or more Azure DevOps organisations")]
+        [DisplayName("Connection")]
         public List<AzureDevOpsConnectionResource> Connections { get; } = new();
     }
 
@@ -34,7 +36,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         [DisplayName("Personal Access Token")]
         [Description(PersonalAccessTokenDescription)]
         [Writeable]
-        [AllowConnectivityCheck("Azure DevOps configuration", AzureDevOpsIssueTrackerApi.ApiConnectivityCheck, nameof(BaseUrl), nameof(PersonalAccessToken))]
+        [AllowConnectivityCheck("Azure DevOps connection", AzureDevOpsIssueTrackerApi.ApiConnectivityCheck, nameof(BaseUrl), nameof(PersonalAccessToken))]
         public SensitiveValue? PersonalAccessToken { get; set; }
 
         [DisplayName("Release Note Options")]
@@ -44,7 +46,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
     class ReleaseNoteOptionsResource
     {
         const string ReleaseNotePrefixDescription =
-            "Set the prefix to look for when finding release notes for Azure DevOps issues. For example `Release note:`.";
+            "Specify a prefix or leave blank to use the work item's title in the release note. (Optional)";
 
         [DisplayName("Release Note Prefix")]
         [Description(ReleaseNotePrefixDescription)]
