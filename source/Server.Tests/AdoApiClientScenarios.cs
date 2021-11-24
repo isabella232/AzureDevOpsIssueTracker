@@ -154,12 +154,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 
             // Request to other host should not include password
             new AdoApiClient(log!, store, httpJsonClient, HtmlConvert)
-                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
+                .GetProjectList(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.IsNull(passwordSent);
 
             // Request to origin should include password
             new AdoApiClient(log!, store, httpJsonClient, HtmlConvert)
-                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
+                .GetProjectList(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.AreEqual("rumor", passwordSent);
         }
 

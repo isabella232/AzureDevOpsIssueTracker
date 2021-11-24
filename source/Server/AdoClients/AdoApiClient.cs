@@ -14,13 +14,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 {
     interface IAdoApiClient
     {
-        IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string? personalAccessToken = null, bool testing = false);
-
-        IResultFromExtension<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId, string? personalAccessToken = null,
-            bool testing = false);
-
         IResultFromExtension<WorkItemLink[]> GetBuildWorkItemLinks(AdoBuildUrls adoBuildUrls);
-        IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null, bool testing = false);
+        IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null);
+        IResult CheckWeCanGetBuilds(AdoProjectUrls adoProjectUrls, string? personalAccessToken = null);
     }
 
     class AdoApiClient : IAdoApiClient
@@ -52,8 +48,20 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string? personalAccessToken = null,
-            bool testing = false)
+        public IResult CheckWeCanGetBuilds(AdoProjectUrls adoProjectUrls, string? personalAccessToken = null)
+        {
+            var buildsUrl = $"{adoProjectUrls.ProjectUrl}/_apis/build/builds?$top=1&api-version=4.1";
+            var (status, jObject) = client.Get(buildsUrl, personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
+            
+            if (!status.IsSuccessStatusCode())
+            {
+                return Result.Failed($"Error while checking whether we can retrieve builds from Azure DevOps: {status.ToDescription(jObject, true)}");
+            }
+
+            return Result.Success();
+        }
+
+        IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string? personalAccessToken = null)
         {
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems?api-version=4.1";
@@ -66,7 +74,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching work item references from Azure DevOps: {status.ToDescription(jObject, testing)}");
+                return ResultFromExtension<(int id, string url)[]>.Failed($"Error while fetching work item references from Azure DevOps: {status.ToDescription(jObject)}");
             }
 
             try
@@ -81,12 +89,13 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        public IResultFromExtension<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
+        IResultFromExtension<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
             string? personalAccessToken = null, bool testing = false)
         {
             // ReSharper disable once StringLiteralTypo
             var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1",
                 personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
+            
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return ResultFromExtension<(string title, int? commentCount)>.Success((workItemId.ToString(), 0));
@@ -218,14 +227,14 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return ResultFromExtension<WorkItemLink[]>.Success(validWorkItemLinks);
         }
 
-        public IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null, bool testing = false)
+        public IResultFromExtension<string[]> GetProjectList(AdoProjectUrls adoUrl, string? personalAccessToken = null)
         {
             var (status, jObject) = client.Get($"{adoUrl.OrganizationUrl}/_apis/projects?api-version=4.1",
                 personalAccessToken ?? GetPersonalAccessToken(adoUrl));
 
             if (!status.IsSuccessStatusCode())
             {
-                return ResultFromExtension<string[]>.Failed($"Error while fetching project list from Azure DevOps: {status.ToDescription(jObject, testing)}");
+                return ResultFromExtension<string[]>.Failed($"Error while fetching project list from Azure DevOps: {status.ToDescription(jObject, true)}");
             }
 
             return ResultFromExtension<string[]>.Success(jObject?["value"]?
