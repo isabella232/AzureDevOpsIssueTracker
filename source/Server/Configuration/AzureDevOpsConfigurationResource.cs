@@ -8,7 +8,7 @@ using Octopus.Server.MessageContracts.Attributes;
 
 namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 {
-    [Description("Configure the Azure DevOps Issue Tracker. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
+    [Description("Automatically add links and retrieve release notes from Azure DevOps work items in your Octopus release and deployments. [Learn more](https://g.octopushq.com/AzureDevOpsIssueTracker).")]
     class AzureDevOpsConfigurationResource : ExtensionConfigurationResource
     {
         [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Reuse)]
