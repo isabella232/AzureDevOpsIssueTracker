@@ -26,42 +26,60 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
         {
             var uri = new Uri(organizationOrProjectUrl);
 
+            var buildIndex = uri.AbsolutePath.IndexOf("/_build/", StringComparison.OrdinalIgnoreCase);
+            if (buildIndex > 0)
             {
-                if (string.Equals(uri.Host, "dev.azure.com", StringComparison.OrdinalIgnoreCase)
-                    && Regex.Match(uri.AbsolutePath, @"^/(?<org>[^/]+)(/(?<proj>[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*))?")
-                        is Match match && match.Success)
+                var projectPath = uri.AbsolutePath[..buildIndex];
+                var indexBeforeProject = projectPath.LastIndexOf("/", StringComparison.OrdinalIgnoreCase);
+                var orgPath = projectPath[..indexBeforeProject];
+                
+                var orgUri = new Uri(uri, orgPath);
+                return new AdoProjectUrls(orgUri.AbsoluteUri)
                 {
-                    var orgUri = new Uri(uri, $"/{match.Groups["org"].Value}");
-                    return new AdoProjectUrls(orgUri.AbsoluteUri)
-                    {
-                        ProjectUrl = match.Groups["proj"].Success
-                            ? $"{orgUri.AbsoluteUri}/{match.Groups["proj"].Value}"
-                            : null
-                    };
-                }
+                    ProjectUrl = new Uri(uri, projectPath).AbsoluteUri
+                };
             }
-
+            
+            if (string.Equals(uri.Host, "dev.azure.com", StringComparison.OrdinalIgnoreCase))
             {
-                var match = Regex.Match(uri.AbsolutePath,
-                    @"^(?<prefix>/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*)?/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*");
-                var isVsUrl = Regex.IsMatch(uri.Host, @"^[^.]+\.visualstudio\.com$");
-                var projectIsSpecified = match.Success
-                                         && (match.Groups["prefix"].Success || isVsUrl);
-                var collectionPath = match.Groups["prefix"].Success
-                    ? match.Groups["prefix"].Value
-                    : isVsUrl /* For VS URLs a single identifier is likely to be a project */
-                        ? "/"
-                        : match.Value;
-
-                var organizationUrl = new Uri(uri, collectionPath).AbsoluteUri;
-
-                return new AdoProjectUrls(organizationUrl)
+                var chunks = uri.AbsolutePath.Split("/", StringSplitOptions.RemoveEmptyEntries);
+                var orgPath = chunks.Length > 0 
+                    ? chunks[0] 
+                    : null;
+                var projectPath = chunks.Length > 1 
+                    ? chunks[1].StartsWith('_') || chunks[1].StartsWith('.') 
+                        ? null 
+                        : chunks[1] 
+                    : null;
+                
+                var orgUri = new Uri(uri, $"/{orgPath}");
+                return new AdoProjectUrls(orgUri.AbsoluteUri)
                 {
-                    ProjectUrl = projectIsSpecified
-                        ? new Uri(uri, match.Value).AbsoluteUri
+                    ProjectUrl = projectPath != null
+                        ? $"{orgUri.AbsoluteUri}/{projectPath}"
                         : null
                 };
             }
+            
+            var match = Regex.Match(uri.AbsolutePath,
+                @"^(?<prefix>/[^_./:\\~&%;@'""?<>|#$*][^/:\\~&%;@'""?<>|#$*]*)?/[^_./:\\~&;@'""?<>|#$*][^/:\\~&;@'""?<>|#$*]*");
+            var isVsUrl = Regex.IsMatch(uri.Host, @"^[^.]+\.visualstudio\.com$");
+            var projectIsSpecified = match.Success
+                                     && (match.Groups["prefix"].Success || isVsUrl);
+            var collectionPath = match.Groups["prefix"].Success
+                ? match.Groups["prefix"].Value
+                : isVsUrl /* For VS URLs a single identifier is likely to be a project */
+                    ? "/"
+                    : match.Value;
+
+            var organizationUrl = new Uri(uri, collectionPath).AbsoluteUri;
+
+            return new AdoProjectUrls(organizationUrl)
+            {
+                ProjectUrl = projectIsSpecified
+                    ? new Uri(uri, match.Value).AbsoluteUri
+                    : null
+            };
         }
     }
 
