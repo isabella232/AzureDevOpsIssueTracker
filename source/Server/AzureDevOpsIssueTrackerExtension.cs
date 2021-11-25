@@ -47,7 +47,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps
             builder.RegisterType<HttpJsonClient>()
                 .As<IHttpJsonClient>()
                 .InstancePerDependency();
-            HttpJsonClient.AuthMessageScope = "to read scopes 'Build' and 'Work items'";
 
             builder.RegisterType<AdoApiClient>()
                 .As<IAdoApiClient>()

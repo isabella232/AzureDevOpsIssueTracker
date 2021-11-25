@@ -60,7 +60,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
     sealed class HttpJsonClient : IHttpJsonClient
     {
-        public static string AuthMessageScope = "for this scope";
+        public static string AuthMessageScope = "to read scopes 'Build', 'Work items' and 'Project and Team'";
 
         private readonly HttpClient httpClient;
 
