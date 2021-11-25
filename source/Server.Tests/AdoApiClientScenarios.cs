@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -22,9 +23,15 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
         private static IAzureDevOpsConfigurationStore CreateSubstituteStore()
         {
             var store = Substitute.For<IAzureDevOpsConfigurationStore>();
-            store.GetBaseUrl().Returns("http://redstoneblock/DefaultCollection/");
-            store.GetPersonalAccessToken().Returns("rumor".ToSensitiveString());
-            store.GetReleaseNotePrefix().Returns("= Changelog =");
+            store.GetConnections().Returns(new List<AzureDevOpsConnection>
+            {
+                new()
+                {
+                    BaseUrl = "http://redstoneblock/DefaultCollection/", PersonalAccessToken = "rumor".ToSensitiveString(),
+                    ReleaseNoteOptions = new ReleaseNoteOptions { ReleaseNotePrefix = "= Changelog =" }
+                }
+            });
+            
             return store;
         }
 
@@ -147,12 +154,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Tests
 
             // Request to other host should not include password
             new AdoApiClient(log!, store, httpJsonClient, HtmlConvert)
-                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
+                .GetProjectList(AdoBuildUrls.ParseBrowserUrl("http://someotherhost/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.IsNull(passwordSent);
 
             // Request to origin should include password
             new AdoApiClient(log!, store, httpJsonClient, HtmlConvert)
-                .GetBuildWorkItemsRefs(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
+                .GetProjectList(AdoBuildUrls.ParseBrowserUrl("http://redstoneblock/DefaultCollection/Deployable/_build/results?buildId=24"));
             Assert.AreEqual("rumor", passwordSent);
         }
 

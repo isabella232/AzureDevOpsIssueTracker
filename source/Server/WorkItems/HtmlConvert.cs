@@ -40,7 +40,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             }
         }
 
-        internal static void AppendPlainText(StringBuilder sb, HtmlNode node)
+        static void AppendPlainText(StringBuilder sb, HtmlNode node)
         {
             if (node is HtmlTextNode)
             {
@@ -61,7 +61,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.WorkItems
             }
         }
 
-        internal static void AppendAnyNewlines(StringBuilder sb, HtmlNode node)
+        static void AppendAnyNewlines(StringBuilder sb, HtmlNode node)
         {
             if (node.NodeType == HtmlNodeType.Element && NewlineElementNames.ContainsKey(node.Name))
             {

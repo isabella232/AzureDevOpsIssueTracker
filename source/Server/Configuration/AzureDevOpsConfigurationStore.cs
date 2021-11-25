@@ -1,4 +1,4 @@
-﻿using Octopus.Data.Model;
+﻿using System.Collections.Generic;
 using Octopus.Data.Storage.Configuration;
 using Octopus.Server.Extensibility.Extensions.Infrastructure.Configuration;
 
@@ -8,7 +8,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
         IAzureDevOpsConfigurationStore
     {
         public static string CommentParser = "Azure DevOps";
-        public static string SingletonId = "issuetracker-azuredevops";
+        public static string SingletonId = "issuetracker-azuredevops-v2";
 
         public AzureDevOpsConfigurationStore(IConfigurationStore configurationStore) : base(configurationStore)
         {
@@ -16,19 +16,9 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Configuration
 
         public override string Id => SingletonId;
 
-        public string? GetBaseUrl()
+        public List<AzureDevOpsConnection> GetConnections()
         {
-            return GetProperty(doc => doc.BaseUrl?.Trim('/'));
+            return GetProperty(doc => doc.Connections);
         }
-
-        public void SetBaseUrl(string? baseUrl)
-        {
-            SetProperty(doc => doc.BaseUrl = baseUrl?.Trim('/'));
-        }
-
-        public SensitiveString? GetPersonalAccessToken() => GetProperty(doc => doc.PersonalAccessToken);
-        public void SetPersonalAccessToken(SensitiveString? value) => SetProperty(doc => doc.PersonalAccessToken = value);
-        public string? GetReleaseNotePrefix() => GetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix);
-        public void SetReleaseNotePrefix(string? releaseNotePrefix) => SetProperty(doc => doc.ReleaseNoteOptions.ReleaseNotePrefix = releaseNotePrefix);
     }
 }

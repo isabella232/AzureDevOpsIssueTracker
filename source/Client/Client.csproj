@@ -8,15 +8,18 @@
     <Company>Octopus Deploy Pty. Ltd.</Company>
     <Product>Octopus Deploy Client Extensibility - AzureDevOps</Product>
     <Description>Octopus Deploy Client Extensibility for the Azure DevOps issue tracker</Description>
-    <PackageLicenseUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</PackageProjectUrl>
-    <PackageIconUrl>https://i.octopusdeploy.com/resources/Avatar3_360.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/OctopusDeploy/AzureDevOpsIssueTracker</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Octopus.Server.Client" Version="11.2.3319" />
+    <None Include="images/icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

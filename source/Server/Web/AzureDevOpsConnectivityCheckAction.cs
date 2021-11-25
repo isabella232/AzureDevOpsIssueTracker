@@ -39,7 +39,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 var personalAccessToken = requestData.PersonalAccessToken.ToSensitiveString();
                 if (string.IsNullOrEmpty(personalAccessToken?.Value))
                 {
-                    personalAccessToken = configurationStore.GetPersonalAccessToken();
+                    personalAccessToken = configurationStore.GetConnections().FirstOrDefault(connection => connection.BaseUrl == baseUrl)?.PersonalAccessToken;
                 }
 
                 if (string.IsNullOrEmpty(baseUrl))
@@ -56,7 +56,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 }
                 else
                 {
-                    var projectsResult = adoApiClient.GetProjectList(urls, personalAccessToken?.Value, true);
+                    var projectsResult = adoApiClient.GetProjectList(urls, personalAccessToken?.Value);
                     if (projectsResult is FailureResult failure)
                     {
                         connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, failure.ErrorString);
@@ -77,33 +77,27 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                     }).ToArray();
                 }
 
+                var hasError = false;
                 foreach (var projectUrl in projectUrls)
                 {
-                    var buildScopeTest = adoApiClient.GetBuildWorkItemsRefs(AdoBuildUrls.Create(projectUrl, 1), personalAccessToken?.Value, true);
+                    var buildScopeTest = adoApiClient.CheckWeCanGetBuilds(projectUrl, personalAccessToken?.Value);
                     if (buildScopeTest is FailureResult buildScopeFailure)
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, buildScopeFailure.ErrorString);
-                        continue;
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, buildScopeFailure.ErrorString);
+                        hasError = true;
                     }
-
-                    var workItemScopeTest = adoApiClient.GetWorkItem(projectUrl, 1, personalAccessToken?.Value, true);
-                    if (workItemScopeTest is FailureResult workItemScopeFailure)
-                    {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, workItemScopeFailure.ErrorString);
-                        continue;
-                    }
-
-                    // the check has been successful, so ignore any messages that came from previous project checks
-                    connectivityCheckResponse = new ConnectivityCheckResponse();
-                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Azure DevOps connection was tested successfully");
-                    if (!configurationStore.GetIsEnabled())
-                    {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
-                    }
-
-                    return Task.FromResult(Result.Response(connectivityCheckResponse));
                 }
 
+                if (!hasError)
+                {
+                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Info, "Successfully connected to Azure DevOps");
+
+                    if (!configurationStore.GetIsEnabled())
+                    {
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
+                    }
+                }
+                
                 return Task.FromResult(Result.Response(connectivityCheckResponse));
             }
             catch (Exception ex)
