@@ -40,7 +40,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             {
                 var azureDevOpsConnection = store.GetMostQualifiedConnection(adoUrl);
 
-                systemLog.Verbose(azureDevOpsConnection?.PersonalAccessToken?.Value != null
+                systemLog.Info(azureDevOpsConnection?.PersonalAccessToken?.Value != null
                     ? $"Found the PersonalAccessToken for {adoUrl.ProjectUrl ?? adoUrl.OrganizationUrl}"
                     : $"Could not find a PersonalAccessToken for {adoUrl.ProjectUrl ?? adoUrl.OrganizationUrl}");
 
