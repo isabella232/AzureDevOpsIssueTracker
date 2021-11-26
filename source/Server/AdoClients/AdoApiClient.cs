@@ -39,7 +39,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             try
             {
                 var azureDevOpsConnection = store.GetMostQualifiedConnection(adoUrl);
-                
+
+                systemLog.Verbose(azureDevOpsConnection?.PersonalAccessToken?.Value != null
+                    ? $"Found the PersonalAccessToken for {adoUrl.ProjectUrl ?? adoUrl.OrganizationUrl}"
+                    : $"Could not find a PersonalAccessToken for {adoUrl.ProjectUrl ?? adoUrl.OrganizationUrl}");
+
                 return azureDevOpsConnection?.PersonalAccessToken?.Value;
             }
             catch
@@ -61,12 +65,12 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             return Result.Success();
         }
 
-        IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls, string? personalAccessToken = null)
+        IResultFromExtension<(int id, string url)[]> GetBuildWorkItemsRefs(AdoBuildUrls adoBuildUrls)
         {
             // ReSharper disable once StringLiteralTypo
             var workItemsUrl = $"{adoBuildUrls.ProjectUrl}/_apis/build/builds/{adoBuildUrls.BuildId}/workitems?api-version=4.1";
 
-            var (status, jObject) = client.Get(workItemsUrl, personalAccessToken ?? GetPersonalAccessToken(adoBuildUrls));
+            var (status, jObject) = client.Get(workItemsUrl, GetPersonalAccessToken(adoBuildUrls));
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
                 return ResultFromExtension<(int id, string url)[]>.Success(Array.Empty<(int, string)>());
@@ -89,12 +93,10 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
             }
         }
 
-        IResultFromExtension<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId,
-            string? personalAccessToken = null, bool testing = false)
+        IResultFromExtension<(string title, int? commentCount)> GetWorkItem(AdoProjectUrls adoProjectUrls, int workItemId)
         {
             // ReSharper disable once StringLiteralTypo
-            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1",
-                personalAccessToken ?? GetPersonalAccessToken(adoProjectUrls));
+            var (status, jObject) = client.Get($"{adoProjectUrls.ProjectUrl}/_apis/wit/workitems/{workItemId}?api-version=4.1", GetPersonalAccessToken(adoProjectUrls));
             
             if (status.HttpStatusCode == HttpStatusCode.NotFound)
             {
@@ -103,7 +105,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.AdoClients
 
             if (!status.IsSuccessStatusCode())
             {
-                return ResultFromExtension<(string title, int? commentCount)>.Failed($"Error while fetching work item details from Azure DevOps: {status.ToDescription(jObject, testing)}");
+                return ResultFromExtension<(string title, int? commentCount)>.Failed($"Error while fetching work item details from Azure DevOps: {status.ToDescription(jObject)}");
             }
 
             try
