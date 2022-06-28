@@ -94,7 +94,7 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 
                     if (!configurationStore.GetIsEnabled())
                     {
-                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, "The Jira Issue Tracker is not enabled, so its functionality will not currently be available");
+                        connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Warning, "The Azure DevOps Issue Tracker is not enabled, so its functionality will not currently be available");
                     }
                 }
                 
