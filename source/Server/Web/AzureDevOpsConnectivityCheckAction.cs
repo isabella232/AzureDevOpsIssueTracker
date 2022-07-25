@@ -12,8 +12,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
     class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
     {
-        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new RequestBodyRegistration<ConnectionCheckData>();
-        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new OctopusJsonRegistration<ConnectivityCheckResponse>();
+        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new();
+        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new();
 
         private readonly IAzureDevOpsConfigurationStore configurationStore;
         private readonly IAdoApiClient adoApiClient;
