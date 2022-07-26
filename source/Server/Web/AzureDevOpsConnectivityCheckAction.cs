@@ -12,8 +12,8 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
 {
     class AzureDevOpsConnectivityCheckAction : IAsyncApiAction
     {
-        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new RequestBodyRegistration<ConnectionCheckData>();
-        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new OctopusJsonRegistration<ConnectivityCheckResponse>();
+        static readonly RequestBodyRegistration<ConnectionCheckData> Data = new();
+        static readonly OctopusJsonRegistration<ConnectivityCheckResponse> Result = new();
 
         private readonly IAzureDevOpsConfigurationStore configurationStore;
         private readonly IAdoApiClient adoApiClient;
@@ -33,6 +33,21 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 var requestData = request.GetBody(Data);
 
                 var baseUrl = requestData.BaseUrl;
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Please provide a value for Azure DevOps Base Url.");
+                    return Task.FromResult(Result.Response(connectivityCheckResponse));
+                }
+
+                if (!ValidateUrl(baseUrl))
+                {
+                    var response = new ConnectivityCheckResponse();
+                    response.AddMessage(
+                        ConnectivityCheckMessageCategory.Error,
+                        "Invalid data received.");
+                    return Task.FromResult(Result.Response(response));
+                }
+
                 // If PersonalAccessToken here is null, it could be that they're clicking the test connectivity button after saving
                 // the configuration as we won't have the value of the PersonalAccessToken on client side, so we need to retrieve it
                 // from the database
@@ -40,12 +55,6 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 if (string.IsNullOrEmpty(personalAccessToken?.Value))
                 {
                     personalAccessToken = configurationStore.GetConnections().FirstOrDefault(connection => connection.BaseUrl == baseUrl)?.PersonalAccessToken;
-                }
-
-                if (string.IsNullOrEmpty(baseUrl))
-                {
-                    connectivityCheckResponse.AddMessage(ConnectivityCheckMessageCategory.Error, "Please provide a value for Azure DevOps Base Url.");
-                    return Task.FromResult(Result.Response(connectivityCheckResponse));
                 }
 
                 var urls = AdoProjectUrls.ParseOrganizationAndProjectUrls(baseUrl);
@@ -106,6 +115,11 @@ namespace Octopus.Server.Extensibility.IssueTracker.AzureDevOps.Web
                 return Task.FromResult(Result.Response(connectivityCheckResponse));
             }
         }
+        
+        static bool ValidateUrl(string url)
+            => Uri.TryCreate(url, UriKind.Absolute, out var uri)
+               && new[] { "http", "https" }.Contains(uri.Scheme)
+               && string.IsNullOrWhiteSpace(uri.Fragment);
     }
 
 #nullable disable
